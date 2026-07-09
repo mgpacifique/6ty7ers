@@ -45,3 +45,5 @@ Configures CORS so your frontend can connect seamlessly later.
 Exposes a standard /health endpoint.
 
 I have prepared a terminal command to spin up the local FastAPI server using Uvicorn. Please approve it, and then you can open http://localhost:8000/docs in your browser to interactively test the API without even needing Postman!
+
+Remaining is to Protect the endpoints for AUTH RBAC
