@@ -132,15 +132,35 @@ def seed_sessions(db, patients, staff):
     return sessions
 
 
+def seed_logs(db):
+    logs = [
+        models.SystemLog(
+            event_type="PATIENT_CHECK_IN",
+            description="Patient checked in with token FT-204",
+        ),
+        models.SystemLog(
+            event_type="PATIENT_TRIAGED",
+            description="Session FT-202 triaged as Routine with score 10",
+        ),
+        models.SystemLog(
+            event_type="EMERGENCY_INSERTION",
+            description="Session EM-101 placed at the head of the Urgent track",
+        ),
+    ]
+    db.add_all(logs)
+    return logs
+
+
 def main():
     db = SessionLocal()
     try:
         staff = seed_staff(db)
         patients = seed_patients(db)
         sessions = seed_sessions(db, patients, staff)
+        logs = seed_logs(db)
         db.commit()
-        print(f"Seeded {len(staff)} staff, {len(patients)} patients "
-              f"and {len(sessions)} queue sessions.")
+        print(f"Seeded {len(staff)} staff, {len(patients)} patients, "
+              f"{len(sessions)} queue sessions, {len(logs)} system logs.")
     finally:
         db.close()
 
