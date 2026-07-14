@@ -64,3 +64,58 @@ KPI: **true wait time = t2_called − t1_check_in**, straight from the columns.
 | description | VARCHAR | NOT NULL | human-readable detail |
 | timestamp | TIMESTAMPTZ | | |
 
+## Sample data rows
+
+Loaded by running (from `backend/`, with `DATABASE_URL` set):
+
+```bash
+python -m app.seed_sample_data
+```
+
+The script is safe to re-run — it removes its own rows first, and touches
+nothing else.
+
+### staff (3 rows)
+
+| username | role | password (sample only) |
+|---|---|---|
+| admin_amina | Admin | admin123 |
+| nurse_grace | Nurse | nurse123 |
+| doctor_jean | Doctor | doctor123 |
+
+Passwords are stored bcrypt-hashed; the plain values above exist only for
+local testing.
+
+### patients (5 rows)
+
+| full_name | phone_number |
+|---|---|
+| Aline Uwimana | +250781000001 |
+| Eric Niyonzima | +250781000002 |
+| Claudine Mukamana | +250781000003 |
+| Samuel Habumugisha | +250781000004 |
+| Josiane Ingabire | +250781000005 |
+
+### queue_sessions (6 rows)
+
+Covers both tracks, every status in the lifecycle, and all three FKs.
+
+| public_token | track_type | status | priority | T1 | T2 | T3 | triaged_by | consulted_by |
+|---|---|---|---|---|---|---|---|---|
+| EM-101 | Urgent | Waiting | 100 | −40 min | | | nurse_grace | |
+| EM-102 | Urgent | Called | 100 | −25 min | −5 min | | nurse_grace | doctor_jean |
+| FT-201 | Routine | Waiting | 10 | −30 min | | | nurse_grace | |
+| FT-202 | Routine | Triaged | 10 | −20 min | | | nurse_grace | |
+| FT-203 | Routine | Completed | 10 | −90 min | −66 min | −50 min | nurse_grace | doctor_jean |
+| FT-204 | | Registered | 0 | −2 min | | | | |
+
+Times are offsets from the moment the seed runs. FT-203 demonstrates the KPI:
+true wait = T2 − T1 = 24 minutes.
+
+### system_logs (3 rows)
+
+| event_type | description |
+|---|---|
+| PATIENT_CHECK_IN | Patient checked in with token FT-204 |
+| PATIENT_TRIAGED | Session FT-202 triaged as Routine with score 10 |
+| EMERGENCY_INSERTION | Session EM-101 placed at the head of the Urgent track |
