@@ -1,5 +1,8 @@
 """Loads a small fixed set of sample rows to demonstrate the schema.
 
+Covers both tracks, every status in the lifecycle and all foreign keys.
+Safe to re-run: it deletes its own rows first and touches nothing else.
+
 Run from backend/ with DATABASE_URL set:
     python -m app.seed_sample_data
 """
@@ -15,7 +18,6 @@ from .database import SessionLocal
 
 def hash_password(password):
     return bcrypt.hashpw(password.encode(), bcrypt.gensalt()).decode()
-
 
 SAMPLE_STAFF = [
     ("admin_amina", "admin123", models.RoleEnum.ADMIN.value),
@@ -36,6 +38,30 @@ SAMPLE_TOKENS = ["EM-101", "EM-102", "FT-201", "FT-202", "FT-203", "FT-204"]
 
 def minutes_ago(minutes):
     return datetime.now(timezone.utc) - timedelta(minutes=minutes)
+
+
+def clear_sample_data(db):
+    # Sessions go first because they hold foreign keys to patients and staff
+    db.query(models.QueueSession).filter(
+        models.QueueSession.public_token.in_(SAMPLE_TOKENS)
+    ).delete(synchronize_session=False)
+
+    sample_phones = [phone for _, phone in SAMPLE_PATIENTS]
+    db.query(models.Patient).filter(
+        models.Patient.phone_number.in_(sample_phones)
+    ).delete(synchronize_session=False)
+
+    sample_usernames = [username for username, _, _ in SAMPLE_STAFF]
+    db.query(models.Staff).filter(
+        models.Staff.username.in_(sample_usernames)
+    ).delete(synchronize_session=False)
+
+    for token in SAMPLE_TOKENS:
+        db.query(models.SystemLog).filter(
+            models.SystemLog.description.contains(token)
+        ).delete(synchronize_session=False)
+
+    db.commit()
 
 
 def seed_staff(db):
@@ -154,6 +180,7 @@ def seed_logs(db):
 def main():
     db = SessionLocal()
     try:
+        clear_sample_data(db)
         staff = seed_staff(db)
         patients = seed_patients(db)
         sessions = seed_sessions(db, patients, staff)
