@@ -18,7 +18,21 @@ class QueueSessionResponse(BaseModel):
     class Config:
         from_attributes = True
 
+
+class StaffOut(BaseModel):
+    id: UUID
+    username: str
+    role: str
+
+    class Config:
+        from_attributes = True
+
+
+class AuthTokenResponse(BaseModel):
+    access_token: str
+    token_type: str = "bearer"
+    staff: StaffOut
+
 class TriageSubmit(BaseModel):
     track_type: str  # "Urgent" or "Routine"
     priority_score: Optional[int] = None # Nurse can override or let system calculate
-    staff_id: UUID # For unprotected endpoints, we simulate who is doing the triage

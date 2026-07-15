@@ -2,6 +2,7 @@ from fastapi import APIRouter, Depends, HTTPException, status, BackgroundTasks
 from sqlalchemy.orm import Session
 from .. import models, schemas
 from ..database import get_db
+from ..services.auth import get_current_staff
 from ..services.websocket import manager
 import uuid
 import random
@@ -16,7 +17,12 @@ def generate_public_token():
     return f"FT-{random.randint(100, 999)}"
 
 @router.post("/check-in", response_model=schemas.QueueSessionResponse, status_code=status.HTTP_201_CREATED)
-def check_in(patient_data: schemas.PatientCheckIn, background_tasks: BackgroundTasks, db: Session = Depends(get_db)):
+def check_in(
+    patient_data: schemas.PatientCheckIn,
+    background_tasks: BackgroundTasks,
+    db: Session = Depends(get_db),
+    current_staff: models.Staff = Depends(get_current_staff),
+):
     # 1. Create Patient
     db_patient = models.Patient(
         full_name=patient_data.full_name,
@@ -37,7 +43,10 @@ def check_in(patient_data: schemas.PatientCheckIn, background_tasks: BackgroundT
     # 3. Log event
     log = models.SystemLog(
         event_type="PATIENT_CHECK_IN",
-        description=f"Patient {db_patient.id} checked in with token {db_session.public_token}"
+        description=(
+            f"Patient {db_patient.id} checked in with token {db_session.public_token} "
+            f"by {current_staff.username}"
+        )
     )
     db.add(log)
     
