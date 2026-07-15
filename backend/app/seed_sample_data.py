@@ -10,7 +10,7 @@ Run from backend/ with DATABASE_URL set:
 from datetime import datetime, timedelta, timezone
 
 # passlib 1.7.4 crashes with bcrypt >= 4.1, so we call bcrypt directly
-import bcrypt
+import bcrypt  # type: ignore[import-not-found]
 
 from . import models
 from .database import SessionLocal
