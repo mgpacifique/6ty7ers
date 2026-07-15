@@ -11,6 +11,7 @@ from dotenv import load_dotenv
 # Add the backend directory to sys.path so we can import app
 sys.path.append(os.path.dirname(os.path.dirname(__file__)))
 from app.models import Base
+from app.database import DATABASE_URL
 
 load_dotenv()
 
@@ -23,8 +24,8 @@ config = context.config
 if config.config_file_name is not None:
     fileConfig(config.config_file_name)
 
-# Set sqlalchemy.url to the one from .env
-config.set_main_option("sqlalchemy.url", os.environ.get("DATABASE_URL", ""))
+# Set sqlalchemy.url to the same URL used by the app, including local fallback
+config.set_main_option("sqlalchemy.url", DATABASE_URL)
 
 # add your model's MetaData object here
 # for 'autogenerate' support
@@ -56,6 +57,7 @@ def run_migrations_offline() -> None:
         target_metadata=target_metadata,
         literal_binds=True,
         dialect_opts={"paramstyle": "named"},
+        render_as_batch=url.startswith("sqlite"),
     )
 
     with context.begin_transaction():
@@ -77,7 +79,9 @@ def run_migrations_online() -> None:
 
     with connectable.connect() as connection:
         context.configure(
-            connection=connection, target_metadata=target_metadata
+            connection=connection,
+            target_metadata=target_metadata,
+            render_as_batch=connection.dialect.name == "sqlite",
         )
 
         with context.begin_transaction():

@@ -1,8 +1,6 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-from .database import Base, engine
-from . import models
-from .routers import patients, triage, ws
+from .routers import auth, patients, triage, ws
 
 app = FastAPI(title="Queue Management API")
 
@@ -16,14 +14,10 @@ app.add_middleware(
 )
 
 # Include routers
+app.include_router(auth.router)
 app.include_router(patients.router)
 app.include_router(triage.router)
 app.include_router(ws.router)
-
-
-@app.on_event("startup")
-def create_database_tables():
-    Base.metadata.create_all(bind=engine)
 
 @app.get("/health")
 def health_check():

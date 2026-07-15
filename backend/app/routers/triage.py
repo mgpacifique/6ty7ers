@@ -2,6 +2,7 @@ from fastapi import APIRouter, Depends, HTTPException, status, BackgroundTasks
 from sqlalchemy.orm import Session
 from .. import models, schemas
 from ..database import get_db
+from ..services.auth import require_roles
 from ..services.smart_logic import calculate_initial_priority
 from ..services.websocket import manager
 import uuid
@@ -12,7 +13,15 @@ router = APIRouter(
 )
 
 @router.post("/{session_id}", response_model=schemas.QueueSessionResponse)
-def submit_triage(session_id: uuid.UUID, triage_data: schemas.TriageSubmit, background_tasks: BackgroundTasks, db: Session = Depends(get_db)):
+def submit_triage(
+    session_id: uuid.UUID,
+    triage_data: schemas.TriageSubmit,
+    background_tasks: BackgroundTasks,
+    db: Session = Depends(get_db),
+    current_staff: models.Staff = Depends(
+        require_roles(models.RoleEnum.ADMIN.value, models.RoleEnum.NURSE.value)
+    ),
+):
     db_session = db.query(models.QueueSession).filter(models.QueueSession.id == session_id).first()
     
     if not db_session:
@@ -21,21 +30,19 @@ def submit_triage(session_id: uuid.UUID, triage_data: schemas.TriageSubmit, back
     if db_session.status != models.StatusEnum.REGISTERED.value:
         raise HTTPException(status_code=400, detail=f"Cannot triage patient with status: {db_session.status}")
 
-    # Validate staff exists
-    db_staff = db.query(models.Staff).filter(models.Staff.id == triage_data.staff_id).first()
-    if not db_staff:
-        raise HTTPException(status_code=404, detail="Staff member not found")
-
     # Update session
     db_session.track_type = triage_data.track_type
     db_session.priority_score = calculate_initial_priority(triage_data.track_type, triage_data.priority_score)
     db_session.status = models.StatusEnum.TRIAGED.value
-    db_session.triaged_by_staff_id = db_staff.id
+    db_session.triaged_by_staff_id = current_staff.id
     
     # Log event
     log = models.SystemLog(
         event_type="PATIENT_TRIAGED",
-        description=f"Session {db_session.public_token} triaged as {db_session.track_type} with score {db_session.priority_score}"
+        description=(
+            f"Session {db_session.public_token} triaged as {db_session.track_type} "
+            f"with score {db_session.priority_score} by {current_staff.username}"
+        )
     )
     db.add(log)
     
