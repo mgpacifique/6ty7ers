@@ -92,3 +92,9 @@ uvicorn app.main:app --reload
 We provide several test scripts in the root of the backend directory:
 - `test_ws.py`: Connects to the WebSocket server and prints real-time broadcast events.
 - `test_otp.py`: Simulates the full end-to-end OTP flow (check-in -> request OTP -> fetch from DB -> verify OTP -> test RBAC).
+
+### 6. Test Credentials (Seed Data)
+If you run `python -m app.seed_sample_data`, the following test accounts are generated for role-based access testing:
+- **Admin**: `admin_amina` / `admin123`
+- **Nurse**: `nurse_grace` / `nurse123`
+- **Doctor**: `doctor_jean` / `doctor123`
