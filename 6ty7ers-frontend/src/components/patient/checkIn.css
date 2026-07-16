@@ -1,0 +1,99 @@
+
+
+.check-in-container{
+  /* border: 1px solid red; */
+  height: 100vh;
+  /* display: flex;
+  flex-direction:column;
+  justify-content: center;
+   */
+  padding: 30px 20px;
+  line-height: 1.5;
+}
+
+/* .check-in-container .header{
+  border: 1px solid gray;
+} */
+
+.check-in-container .header p{
+  margin:0;
+}
+
+.check-in-container .header span{
+  font-size: 2em;
+  font-family: 'Open Sans', sans-serif;
+}
+
+.form{
+  display: flex;
+  flex-direction:column;
+  gap:20px;
+  margin-top:20px;
+}
+.form-card {
+  /* border: 1px solid green; */
+  border-radius: 30px;
+  margin-top: 20px;
+  padding: 20px;
+  background: rgba(0, 128, 0, 0.048);
+}
+
+.form-card span{
+  font-size:1.2rem;
+}
+
+
+.form-group{
+  display: flex;
+  flex-direction: column;
+}
+
+.form-group label{
+  font-size: 0.9em;
+}
+
+
+.form-group input{
+  padding: 10px;
+  border-radius: 20px;
+  border-style: none;
+  border: 1px solid rgba(128, 128, 128, 0.338);
+  margin-top:10px;
+  transition: all 0.3s ease;
+}
+
+.form-group input:focus {
+  outline: none;
+  border-color: rgb(56, 175, 136);
+  box-shadow: 0 0 0 3px rgba(56, 175, 136, 0.1);
+}
+
+.privacy-notice{
+  text-align: center;
+  margin: 20px 0px;
+}
+
+.continue-btn{
+  padding: 20px;
+  border-radius:20px;
+  background-color:rgb(56, 175, 136);
+  color: white;
+  border-style: none;
+  font-size: 20px;
+  width:100%;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.continue-btn:hover {
+  background-color: rgb(46, 155, 116);
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(56, 175, 136, 0.3);
+}
+
+.continue-btn:active {
+  transform: translateY(0);
+}
+
+
+
