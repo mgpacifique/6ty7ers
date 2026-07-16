@@ -18,6 +18,8 @@ class QueueSessionResponse(BaseModel):
     class Config:
         from_attributes = True
 
+class QueueItemResponse(QueueSessionResponse):
+    dynamic_priority: int
 
 class StaffOut(BaseModel):
     id: UUID
@@ -36,3 +38,10 @@ class AuthTokenResponse(BaseModel):
 class TriageSubmit(BaseModel):
     track_type: str  # "Urgent" or "Routine"
     priority_score: Optional[int] = None # Nurse can override or let system calculate
+
+class PatientOTPRequest(BaseModel):
+    phone_number: str
+
+class PatientOTPVerify(BaseModel):
+    phone_number: str
+    otp_code: str

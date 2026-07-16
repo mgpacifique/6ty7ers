@@ -62,4 +62,8 @@ def submit_triage(
     }
     background_tasks.add_task(manager.broadcast, broadcast_data)
     
+    # Broadcast updated queue stats
+    from ..services.smart_logic import broadcast_queue_stats
+    broadcast_queue_stats(db, background_tasks)
+    
     return db_session
