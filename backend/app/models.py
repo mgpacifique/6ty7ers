@@ -32,6 +32,8 @@ class Patient(Base):
     id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
     full_name = Column(String, nullable=False) # Might use application-level encryption later
     phone_number = Column(String, nullable=False)
+    otp_code = Column(String, nullable=True)
+    otp_expires_at = Column(DateTime(timezone=True), nullable=True)
     created_at = Column(DateTime(timezone=True), default=lambda: datetime.now(timezone.utc))
 
     sessions = relationship("QueueSession", back_populates="patient")

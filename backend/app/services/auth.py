@@ -46,6 +46,19 @@ def create_access_token(staff: models.Staff) -> str:
     signature = _sign(f"{header_segment}.{payload_segment}")
     return f"{header_segment}.{payload_segment}.{signature}"
 
+def create_patient_access_token(patient: models.Patient) -> str:
+    expires_at = datetime.now(timezone.utc) + timedelta(minutes=TOKEN_EXPIRY_MINUTES)
+    payload = {
+        "sub": str(patient.id),
+        "username": patient.phone_number,
+        "role": "Patient",
+        "exp": int(expires_at.timestamp()),
+    }
+    header_segment = _base64url_encode(json.dumps({"alg": "HS256", "typ": "JWT"}, separators=(",", ":")).encode())
+    payload_segment = _base64url_encode(json.dumps(payload, separators=(",", ":")).encode())
+    signature = _sign(f"{header_segment}.{payload_segment}")
+    return f"{header_segment}.{payload_segment}.{signature}"
+
 
 def decode_access_token(token: str) -> dict:
     try:
@@ -103,6 +116,32 @@ def get_current_staff(
     if not staff:
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Staff not found")
     return staff
+
+
+def get_current_patient(
+    credentials: HTTPAuthorizationCredentials | None = Depends(security_scheme),
+    db: Session = Depends(get_db),
+) -> models.Patient:
+    if credentials is None:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Not authenticated",
+            headers={"WWW-Authenticate": "Bearer"},
+        )
+
+    payload = decode_access_token(credentials.credentials)
+    if payload.get("role") != "Patient":
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Not a patient token")
+
+    try:
+        patient_id = uuid.UUID(str(payload.get("sub")))
+    except (TypeError, ValueError) as exc:
+        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid token") from exc
+
+    patient = db.query(models.Patient).filter(models.Patient.id == patient_id).first()
+    if not patient:
+        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Patient not found")
+    return patient
 
 
 def require_roles(*allowed_roles: str) -> Callable:

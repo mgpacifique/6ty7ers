@@ -23,14 +23,17 @@ def check_in(
     db: Session = Depends(get_db),
     current_staff: models.Staff = Depends(get_current_staff),
 ):
-    # 1. Create Patient
-    db_patient = models.Patient(
-        full_name=patient_data.full_name,
-        phone_number=patient_data.phone_number
-    )
-    db.add(db_patient)
-    db.commit()
-    db.refresh(db_patient)
+    # 1. Get or Create Patient
+    db_patient = db.query(models.Patient).filter(models.Patient.phone_number == patient_data.phone_number).first()
+    
+    if not db_patient:
+        db_patient = models.Patient(
+            full_name=patient_data.full_name,
+            phone_number=patient_data.phone_number
+        )
+        db.add(db_patient)
+        db.commit()
+        db.refresh(db_patient)
 
     # 2. Create QueueSession
     db_session = models.QueueSession(
@@ -63,5 +66,14 @@ def check_in(
         }
     }
     background_tasks.add_task(manager.broadcast, broadcast_data)
+    
+    # Broadcast updated queue stats
+    from ..services.smart_logic import broadcast_queue_stats
+    broadcast_queue_stats(db, background_tasks)
+    
+    # Send Welcome SMS
+    from ..services.sms import send_sms
+    welcome_msg = f"Welcome to 6ty7ers Clinic. Your queue token is {db_session.public_token}. Go to http://127.0.0.1:8000 to log in using this phone number and track your wait time."
+    background_tasks.add_task(send_sms, db_patient.phone_number, welcome_msg)
     
     return db_session

@@ -1,6 +1,6 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-from .routers import auth, patients, triage, ws
+from .routers import auth, patients, triage, ws, queue, patient_auth
 
 app = FastAPI(title="Queue Management API")
 
@@ -15,9 +15,11 @@ app.add_middleware(
 
 # Include routers
 app.include_router(auth.router)
+app.include_router(patient_auth.router)
 app.include_router(patients.router)
 app.include_router(triage.router)
 app.include_router(ws.router)
+app.include_router(queue.router)
 
 @app.get("/health")
 def health_check():
