@@ -1,6 +1,6 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-from .routers import patients, triage, ws
+from .routers import auth, patients, triage, ws
 
 app = FastAPI(title="Queue Management API")
 
@@ -14,6 +14,7 @@ app.add_middleware(
 )
 
 # Include routers
+app.include_router(auth.router)
 app.include_router(patients.router)
 app.include_router(triage.router)
 app.include_router(ws.router)
