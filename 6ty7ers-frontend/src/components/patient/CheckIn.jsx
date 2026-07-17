@@ -38,7 +38,7 @@ export default function CheckIn({ onCheckInComplete }) {
     <div className="check-in-container">
       <div className="header">
         <span>Welcome</span>
-        <p className="subtitle">Borcelle Hospital, Get your queue token</p>
+        <p className="subtitle">King Faisal Hospital, Get your queue token</p>
       </div>
 
       <div className="form-card">
