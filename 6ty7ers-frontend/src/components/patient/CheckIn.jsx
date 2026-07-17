@@ -1,8 +1,8 @@
 import { useState } from 'react';
 import { apiPost } from '../../services/api';
-import "./checkIn.css"
+import "./checkIn.css";
 
-export default function CheckIn({ onCheckInComplete }) {
+export default function CheckIn({ onCheckInComplete, onViewHistory }) {
   const [fullName, setFullName] = useState('');
   const [phoneNumber, setPhoneNumber] = useState('');
   const [reasonForVisit, setReasonForVisit] = useState('');
@@ -21,7 +21,6 @@ export default function CheckIn({ onCheckInComplete }) {
         reason_for_visit: reasonForVisit || null,
       });
 
-      // Call parent callback to proceed to department selection
       if (onCheckInComplete) {
         onCheckInComplete(response);
       } else {
@@ -46,7 +45,7 @@ export default function CheckIn({ onCheckInComplete }) {
         <p className="form-subtitle" style={{marginTop: '2px '}}>No account needed — just for this visit.</p>
 
         <form onSubmit={handleSubmit} className="form" id="checkInForm">
-          
+
           <div className="form-group">
             <label htmlFor="fullName">FULL NAME</label>
             <input
@@ -92,6 +91,13 @@ export default function CheckIn({ onCheckInComplete }) {
       <p className="privacy-notice">
         Your details are only used for this visit
       </p>
+
+      {onViewHistory && (
+        <button className="view-history-link" onClick={onViewHistory} type="button">
+          Welcome back! We recognize this number<br />
+          <strong>View My Past Visits ›</strong>
+        </button>
+      )}
 
       <button
         type="submit"
