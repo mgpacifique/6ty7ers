@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { apiGet } from '../../service/api';
+import { apiGet, apiPost } from '../../service/api';
 
 export default function Dashboard() {
   const staff = JSON.parse(localStorage.getItem('staff') || '{}');
@@ -31,8 +31,20 @@ export default function Dashboard() {
 
   // Calculate metrics
   const totalWaiting = queueData.length;
-  const avgWait = '28m'; // TODO: Calculate from actual data
-  const totalServed = 41; // TODO: Fetch from backend
+
+  // Calculate average wait time from t1_check_in to now
+  const avgWait = queueData.length > 0
+    ? Math.round(
+        queueData.reduce((sum, p) => {
+          const checkInTime = new Date(p.t1_check_in);
+          const waitMs = Date.now() - checkInTime.getTime();
+          const waitMins = Math.floor(waitMs / 60000);
+          return sum + waitMins;
+        }, 0) / queueData.length
+      ) + 'm'
+    : '0m';
+
+  const totalServed = 41; // TODO: Fetch from backend (separate endpoint)
 
   const handleLogout = () => {
     localStorage.removeItem('access_token');
@@ -40,9 +52,15 @@ export default function Dashboard() {
     window.location.href = '/staff';
   };
 
-  const handleCallPatient = (token) => {
-    console.log(`Called patient: ${token}`);
-    // TODO: Call backend to mark patient as called
+  const handleCallPatient = async (sessionId, token) => {
+    try {
+      await apiPost(`/queue/${sessionId}/call`, {});
+      // Refresh queue data after calling patient
+      const response = await apiGet('/queue/');
+      setQueueData(response || []);
+    } catch (err) {
+      setError(`Failed to call patient ${token}`);
+    }
   };
 
   if (loading) return <div>Loading dashboard...</div>;
@@ -84,20 +102,24 @@ export default function Dashboard() {
         </div>
         <div className="patient-list">
           {urgentPatients.length > 0 ? (
-            urgentPatients.map((patient) => (
-              <div key={patient.id} className="patient-card urgent">
-                <div className="patient-info">
-                  <div className="patient-token">{patient.public_token}</div>
-                  <div className="patient-reason">Chest pain - 2 min ago</div>
+            urgentPatients.map((patient) => {
+              const checkInTime = new Date(patient.t1_check_in);
+              const waitMins = Math.floor((Date.now() - checkInTime.getTime()) / 60000);
+              return (
+                <div key={patient.id} className="patient-card urgent">
+                  <div className="patient-info">
+                    <div className="patient-token">{patient.public_token}</div>
+                    <div className="patient-reason">{waitMins} min ago</div>
+                  </div>
+                  <button
+                    onClick={() => handleCallPatient(patient.id, patient.public_token)}
+                    className="call-btn"
+                  >
+                    Call
+                  </button>
                 </div>
-                <button
-                  onClick={() => handleCallPatient(patient.public_token)}
-                  className="call-btn"
-                >
-                  Call
-                </button>
-              </div>
-            ))
+              );
+            })
           ) : (
             <p className="empty-state">No urgent patients</p>
           )}
@@ -121,15 +143,19 @@ export default function Dashboard() {
           {routinePatients.length > 0 ? (
             routinePatients
               .slice(0, showAllRoutine ? undefined : 3)
-              .map((patient) => (
-                <div key={patient.id} className="patient-card routine">
-                  <div className="patient-info">
-                    <div className="patient-token">{patient.public_token}</div>
-                    <div className="patient-reason">Fever, checkup - 8 min ago</div>
+              .map((patient) => {
+                const checkInTime = new Date(patient.t1_check_in);
+                const waitMins = Math.floor((Date.now() - checkInTime.getTime()) / 60000);
+                return (
+                  <div key={patient.id} className="patient-card routine">
+                    <div className="patient-info">
+                      <div className="patient-token">{patient.public_token}</div>
+                      <div className="patient-reason">{waitMins} min ago</div>
+                    </div>
+                    <div className="patient-time">{waitMins}m</div>
                   </div>
-                  <div className="patient-time">8m</div>
-                </div>
-              ))
+                );
+              })
           ) : (
             <p className="empty-state">No routine patients</p>
           )}
