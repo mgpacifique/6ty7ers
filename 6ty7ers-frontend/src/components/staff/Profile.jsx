@@ -1,10 +1,49 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { apiGet } from '../../service/api';
 
 export default function Profile() {
   const navigate = useNavigate();
   const staff = JSON.parse(localStorage.getItem('staff') || '{}');
   const [expandedSections, setExpandedSections] = useState({});
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState('');
+  const [profileData, setProfileData] = useState({
+    name: staff.username || 'Staff',
+    role: 'Staff',
+    department: 'General Medicine',
+    patients: 0,
+    onTimeRating: 0,
+    hospital: 'Hospital',
+    shiftHours: '7:00 AM - 3:00 PM',
+  });
+
+  // Fetch staff profile data from backend
+  useEffect(() => {
+    const fetchProfileData = async () => {
+      try {
+        setLoading(true);
+        if (staff.id) {
+          const response = await apiGet(`/staff/${staff.id}`);
+          setProfileData({
+            name: response.full_name || staff.username || 'Staff',
+            role: response.role || 'Staff',
+            department: response.department || 'General Medicine',
+            patients: response.total_patients || 0,
+            onTimeRating: response.on_time_rating || 0,
+            hospital: response.hospital || 'Hospital',
+            shiftHours: response.shift_hours || '7:00 AM - 3:00 PM',
+          });
+        }
+      } catch (err) {
+        setError(err.message || 'Failed to load profile data');
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchProfileData();
+  }, [staff.id]);
 
   const handleBack = () => {
     navigate('/staff/dashboard');
@@ -23,6 +62,12 @@ export default function Profile() {
     }));
   };
 
+  if (loading) {
+    return <div>Loading profile...</div>;
+  }
+
+  const avatarInitial = profileData.name.charAt(0).toUpperCase();
+
   return (
     <div className="profile-container">
       {/* Header */}
@@ -33,23 +78,26 @@ export default function Profile() {
         </div>
       </div>
 
+      {/* Error Message */}
+      {error && <div className="error-message">{error}</div>}
+
       {/* Staff Info Card */}
       <div className="staff-info-card">
-        <div className="avatar">A</div>
+        <div className="avatar">{avatarInitial}</div>
         <div className="staff-details">
-          <h2 className="staff-name">Nurse Amina Uwase</h2>
-          <p className="staff-role">Nurse - General Medicine</p>
+          <h2 className="staff-name">{profileData.name}</h2>
+          <p className="staff-role">{profileData.role} - {profileData.department}</p>
         </div>
       </div>
 
       {/* Stats */}
       <div className="stats-section">
         <div className="stat">
-          <div className="stat-value">412</div>
+          <div className="stat-value">{profileData.patients}</div>
           <div className="stat-label">Patients</div>
         </div>
         <div className="stat">
-          <div className="stat-value">49</div>
+          <div className="stat-value">{profileData.onTimeRating}</div>
           <div className="stat-label">On-Time Rating</div>
         </div>
       </div>
@@ -62,14 +110,14 @@ export default function Profile() {
             onClick={() => toggleSection('hospital')}
             className="settings-header"
           >
-            <span>🏥 Borcelle Hospital</span>
+            <span>🏥 {profileData.hospital}</span>
             <span className="chevron">
               {expandedSections.hospital ? '▼' : '▶'}
             </span>
           </button>
           {expandedSections.hospital && (
             <div className="settings-content">
-              <p>Main Branch</p>
+              <p>{profileData.hospital}</p>
             </div>
           )}
         </div>
@@ -87,7 +135,7 @@ export default function Profile() {
           </button>
           {expandedSections.shift && (
             <div className="settings-content">
-              <p>7:00 AM - 3:00 PM</p>
+              <p>{profileData.shiftHours}</p>
             </div>
           )}
         </div>
