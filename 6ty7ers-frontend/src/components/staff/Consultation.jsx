@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
-import { apiPost } from '../../service/api';
+import { apiPost, apiGet } from '../../service/api';
 
 export default function Consultation() {
   const navigate = useNavigate();
@@ -10,18 +10,47 @@ export default function Consultation() {
   const [notes, setNotes] = useState('');
   const [elapsedTime, setElapsedTime] = useState('00:00');
   const [loading, setLoading] = useState(false);
+  const [pageLoading, setPageLoading] = useState(true);
   const [error, setError] = useState('');
   const [isPaused, setIsPaused] = useState(false);
+  const [consultationData, setConsultationData] = useState(null);
 
-  // Mock consultation data - TODO: Fetch from backend
-  const consultationData = {
-    token: 'FT-405',
-    patientName: 'Om Prakash',
-    room: 'Room 4',
-    trackType: 'Routine',
-    checkInTime: '09:12 AM',
-    calledTime: '09:40 AM',
-  };
+  // Fetch consultation data from backend
+  useEffect(() => {
+    const fetchConsultationData = async () => {
+      try {
+        setPageLoading(true);
+        const response = await apiGet(`/queue-sessions/${sessionId}`);
+        setConsultationData({
+          token: response.public_token,
+          patientName: response.patient?.full_name || 'Unknown',
+          room: 'Room 4', // TODO: Get actual room from backend
+          trackType: response.track_type || 'Routine',
+          checkInTime: response.t1_check_in,
+          calledTime: response.t2_called,
+        });
+
+        // Calculate elapsed time from when patient was called
+        if (response.t2_called) {
+          const calledTime = new Date(response.t2_called);
+          const elapsedMs = Date.now() - calledTime.getTime();
+          const elapsedMins = Math.floor(elapsedMs / 60000);
+          const elapsedSecs = Math.floor((elapsedMs % 60000) / 1000);
+          setElapsedTime(
+            `${String(elapsedMins).padStart(2, '0')}:${String(elapsedSecs).padStart(2, '0')}`
+          );
+        }
+      } catch (err) {
+        setError(err.message || 'Failed to load consultation data');
+      } finally {
+        setPageLoading(false);
+      }
+    };
+
+    if (sessionId) {
+      fetchConsultationData();
+    }
+  }, [sessionId]);
 
   // Timer for elapsed time
   useEffect(() => {
@@ -63,6 +92,42 @@ export default function Consultation() {
   const handleBack = () => {
     navigate('/staff/dashboard');
   };
+
+  const handleCallPatient = async () => {
+    setLoading(true);
+    setError('');
+
+    try {
+      await apiPost(`/queue/${sessionId}/call`, {});
+      // Refresh consultation data after calling patient
+      const response = await apiGet(`/queue-sessions/${sessionId}`);
+      setConsultationData({
+        token: response.public_token,
+        patientName: response.patient?.full_name || 'Unknown',
+        room: 'Room 4',
+        trackType: response.track_type || 'Routine',
+        checkInTime: response.t1_check_in,
+        calledTime: response.t2_called,
+      });
+    } catch (err) {
+      setError(err.message || 'Failed to call patient');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  if (pageLoading) {
+    return <div>Loading consultation data...</div>;
+  }
+
+  if (!consultationData) {
+    return (
+      <div className="consultation-container">
+        <div className="error-message">No consultation data found</div>
+        <button onClick={handleBack} className="back-btn">Back to Dashboard</button>
+      </div>
+    );
+  }
 
   return (
     <div className="consultation-container">
