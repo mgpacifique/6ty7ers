@@ -1,30 +1,55 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
-import { apiPost } from '../../service/api';
+import { apiPost, apiGet } from '../../service/api';
 
 export default function Triage() {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
   const sessionId = searchParams.get('sessionId');
+  const staff = JSON.parse(localStorage.getItem('staff') || '{}');
 
   const [urgencyLevel, setUrgencyLevel] = useState('');
   const [notes, setNotes] = useState('');
   const [loading, setLoading] = useState(false);
+  const [pageLoading, setPageLoading] = useState(true);
   const [error, setError] = useState('');
+  const [patientData, setPatientData] = useState(null);
 
-  // Mock patient data - TODO: Fetch from backend
-  const patientData = {
-    token: 'FT-405',
-    name: 'Om Prakash',
-    checkedInTime: '12 mins ago',
-    reason: 'Fever, general checkup',
-  };
+  // Fetch patient data from backend
+  useEffect(() => {
+    const fetchPatientData = async () => {
+      try {
+        setPageLoading(true);
+        // Fetch the specific queue session
+        const response = await apiGet(`/queue-sessions/${sessionId}`);
+        setPatientData({
+          token: response.public_token,
+          name: response.patient?.full_name || 'Unknown',
+          checkedInTime: response.t1_check_in,
+          reason: response.reason_for_visit || 'No reason provided',
+        });
+      } catch (err) {
+        setError(err.message || 'Failed to load patient data');
+      } finally {
+        setPageLoading(false);
+      }
+    };
+
+    if (sessionId) {
+      fetchPatientData();
+    }
+  }, [sessionId]);
 
   const handleSubmitTriage = async (e) => {
     e.preventDefault();
 
     if (!urgencyLevel) {
       setError('Please select an urgency level');
+      return;
+    }
+
+    if (!staff.id) {
+      setError('Staff ID not found. Please log in again.');
       return;
     }
 
@@ -36,11 +61,11 @@ export default function Triage() {
       await apiPost(`/triage/${sessionId}`, {
         track_type: urgencyLevel,
         priority_score: null, // Backend calculates this
-        staff_id: null, // TODO: Use logged-in staff ID
+        staff_id: staff.id,
         notes: notes || null,
       });
 
-      // Navigate to next step or back to dashboard
+      // Navigate back to dashboard after successful triage
       navigate('/staff/dashboard');
     } catch (err) {
       setError(err.message || 'Failed to submit triage');
@@ -52,6 +77,22 @@ export default function Triage() {
   const handleBack = () => {
     navigate('/staff/dashboard');
   };
+
+  if (pageLoading) {
+    return <div>Loading patient data...</div>;
+  }
+
+  if (!patientData) {
+    return (
+      <div className="triage-container">
+        <div className="error-message">No patient data found</div>
+        <button onClick={handleBack} className="back-btn">Back to Dashboard</button>
+      </div>
+    );
+  }
+
+  const checkInTime = new Date(patientData.checkedInTime);
+  const waitMins = Math.floor((Date.now() - checkInTime.getTime()) / 60000);
 
   return (
     <div className="triage-container">
@@ -73,7 +114,7 @@ export default function Triage() {
         <div className="patient-details">
           <div className="detail-row">
             <span className="label">Checked in:</span>
-            <span className="value">{patientData.checkedInTime}</span>
+            <span className="value">{waitMins} mins ago</span>
           </div>
           <div className="detail-row">
             <span className="label">Reason:</span>
