@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { apiPost } from '../../services/api';
+import { apiPost } from '../../service/api';
 import "./checkIn.css";
 
 export default function CheckIn({ onCheckInComplete, onViewHistory }) {
