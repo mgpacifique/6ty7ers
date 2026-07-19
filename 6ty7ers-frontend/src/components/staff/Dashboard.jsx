@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { apiGet, apiPost } from '../../service/api';
+import { onQueueUpdate, offQueueUpdate, disconnectSocket } from '../../service/socket';
 
 export default function Dashboard() {
   const staff = JSON.parse(localStorage.getItem('staff') || '{}');
@@ -23,6 +24,23 @@ export default function Dashboard() {
     };
 
     fetchQueue();
+
+    // Set up real-time queue updates
+    const handleQueueUpdate = async () => {
+      try {
+        const response = await apiGet('/queue/');
+        setQueueData(response || []);
+      } catch (err) {
+        setError(err.message || 'Failed to update queue');
+      }
+    };
+
+    onQueueUpdate(handleQueueUpdate);
+
+    return () => {
+      offQueueUpdate(handleQueueUpdate);
+      disconnectSocket();
+    };
   }, []);
 
   // Separate urgent and routine patients
