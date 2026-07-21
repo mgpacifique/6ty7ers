@@ -22,8 +22,7 @@ async def test_otp_flow():
         admin_headers = {"Authorization": f"Bearer {admin_token}"}
         
         # 2. Check-in a patient
-        import random
-        phone_number = f"+250788{random.randint(100000, 999999)}"
+        phone_number = "+250790855780"
         print(f"{Fore.YELLOW}Checking in patient with phone {phone_number}...{Style.RESET_ALL}")
         
         patient_data = {"full_name": "OTP Test Patient", "phone_number": phone_number}
