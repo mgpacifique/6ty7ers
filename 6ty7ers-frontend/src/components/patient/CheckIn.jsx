@@ -18,8 +18,10 @@ export default function CheckIn({ onCheckInComplete, onViewHistory }) {
       const response = await apiPost('/patients/check-in', {
         full_name: fullName,
         phone_number: phoneNumber,
-        reason_for_visit: reasonForVisit || null,
       });
+
+      // Attach phone number to response for later use
+      response.phone_number = phoneNumber;
 
       if (onCheckInComplete) {
         onCheckInComplete(response);

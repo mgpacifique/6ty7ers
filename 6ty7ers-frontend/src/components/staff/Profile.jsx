@@ -184,10 +184,10 @@ export default function Profile() {
 
       {/* Bottom Navigation */}
       <div className="bottom-nav">
-        <button className="nav-item">👥 Queue</button>
-        <button className="nav-item">📋 Triage</button>
-        <button className="nav-item">📊 Reports</button>
-        <button className="nav-item active">👤 Profile</button>
+        <button className="nav-item" onClick={() => navigate('/staff/dashboard')}>👥 Queue</button>
+        <button className="nav-item" onClick={() => navigate('/staff/triage')}>📋 Triage</button>
+        <button className="nav-item" onClick={() => navigate('/staff/reports')}>📊 Reports</button>
+        <button className="nav-item active" onClick={() => navigate('/staff/profile')}>👤 Profile</button>
       </div>
     </div>
   );

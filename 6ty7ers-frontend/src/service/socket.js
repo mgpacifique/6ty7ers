@@ -1,41 +1,45 @@
-import { io } from 'socket.io-client';
-
-const SOCKET_URL = import.meta.env.VITE_SOCKET_URL || 'http://localhost:8000';
+const WS_URL = import.meta.env.VITE_SOCKET_URL || 'ws://localhost:8000/ws';
 
 let socket = null;
+const eventListeners = {};
 
 export const connectSocket = () => {
-  if (socket) return socket;
+  if (socket && socket.readyState === WebSocket.OPEN) return socket;
 
-  const token = localStorage.getItem('access_token');
-  socket = io(SOCKET_URL, {
-    auth: {
-      token: token || '',
-    },
-    reconnection: true,
-    reconnectionDelay: 1000,
-    reconnectionDelayMax: 5000,
-    reconnectionAttempts: 5,
-  });
+  const wsUrl = WS_URL.startsWith('ws') ? WS_URL : WS_URL.replace(/^http/, 'ws');
+  socket = new WebSocket(wsUrl);
 
-  socket.on('connect', () => {
-    console.log('Socket connected:', socket.id);
-  });
+  socket.onopen = () => {
+    console.log('WebSocket connected');
+  };
 
-  socket.on('disconnect', () => {
-    console.log('Socket disconnected');
-  });
+  socket.onclose = () => {
+    console.log('WebSocket disconnected');
+  };
 
-  socket.on('connect_error', (error) => {
-    console.error('Socket connection error:', error);
-  });
+  socket.onerror = (error) => {
+    console.error('WebSocket error:', error);
+  };
+
+  socket.onmessage = (event) => {
+    try {
+      const payload = JSON.parse(event.data);
+      const eventType = payload.event;
+
+      if (eventListeners[eventType]) {
+        eventListeners[eventType].forEach(callback => callback(payload));
+      }
+    } catch (err) {
+      console.error('Failed to parse WebSocket message:', err);
+    }
+  };
 
   return socket;
 };
 
 export const disconnectSocket = () => {
   if (socket) {
-    socket.disconnect();
+    socket.close();
     socket = null;
   }
 };
@@ -44,68 +48,56 @@ export const getSocket = () => {
   return socket || connectSocket();
 };
 
+const addListener = (eventType, callback) => {
+  getSocket();
+  if (!eventListeners[eventType]) {
+    eventListeners[eventType] = [];
+  }
+  eventListeners[eventType].push(callback);
+};
+
+const removeListener = (eventType, callback) => {
+  if (eventListeners[eventType]) {
+    eventListeners[eventType] = eventListeners[eventType].filter(cb => cb !== callback);
+  }
+};
+
+export const onNewPatient = (callback) => {
+  addListener('NEW_PATIENT', callback);
+};
+
+export const onPatientTriaged = (callback) => {
+  addListener('PATIENT_TRIAGED', callback);
+};
+
 export const onQueueUpdate = (callback) => {
-  const sock = getSocket();
-  sock.on('queue:update', callback);
-};
-
-export const onQueuePatientAdded = (callback) => {
-  const sock = getSocket();
-  sock.on('queue:patient-added', callback);
-};
-
-export const onQueuePatientCalled = (callback) => {
-  const sock = getSocket();
-  sock.on('queue:patient-called', callback);
-};
-
-export const onQueuePatientCompleted = (callback) => {
-  const sock = getSocket();
-  sock.on('queue:patient-completed', callback);
-};
-
-export const onPatientPositionUpdate = (callback) => {
-  const sock = getSocket();
-  sock.on('patient:position-update', callback);
+  addListener('QUEUE_STATS', callback);
 };
 
 export const onPatientCalled = (callback) => {
-  const sock = getSocket();
-  sock.on('patient:called', callback);
+  addListener('PATIENT_CALLED', callback);
+};
+
+export const onPatientCompleted = (callback) => {
+  addListener('PATIENT_COMPLETED', callback);
+};
+
+export const offNewPatient = (callback) => {
+  removeListener('NEW_PATIENT', callback);
+};
+
+export const offPatientTriaged = (callback) => {
+  removeListener('PATIENT_TRIAGED', callback);
 };
 
 export const offQueueUpdate = (callback) => {
-  if (socket) {
-    socket.off('queue:update', callback);
-  }
-};
-
-export const offQueuePatientAdded = (callback) => {
-  if (socket) {
-    socket.off('queue:patient-added', callback);
-  }
-};
-
-export const offQueuePatientCalled = (callback) => {
-  if (socket) {
-    socket.off('queue:patient-called', callback);
-  }
-};
-
-export const offQueuePatientCompleted = (callback) => {
-  if (socket) {
-    socket.off('queue:patient-completed', callback);
-  }
-};
-
-export const offPatientPositionUpdate = (callback) => {
-  if (socket) {
-    socket.off('patient:position-update', callback);
-  }
+  removeListener('QUEUE_STATS', callback);
 };
 
 export const offPatientCalled = (callback) => {
-  if (socket) {
-    socket.off('patient:called', callback);
-  }
+  removeListener('PATIENT_CALLED', callback);
+};
+
+export const offPatientCompleted = (callback) => {
+  removeListener('PATIENT_COMPLETED', callback);
 };

@@ -1,8 +1,10 @@
 import { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { apiGet, apiPost } from '../../service/api';
 import { onQueueUpdate, offQueueUpdate, disconnectSocket } from '../../service/socket';
 
 export default function Dashboard() {
+  const navigate = useNavigate();
   const staff = JSON.parse(localStorage.getItem('staff') || '{}');
   const [queueData, setQueueData] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -25,14 +27,17 @@ export default function Dashboard() {
 
     fetchQueue();
 
-    // Set up real-time queue updates
-    const handleQueueUpdate = async () => {
-      try {
-        const response = await apiGet('/queue/');
-        setQueueData(response || []);
-      } catch (err) {
-        setError(err.message || 'Failed to update queue');
-      }
+    // Set up real-time queue updates on queue stats change
+    const handleQueueUpdate = () => {
+      const refetch = async () => {
+        try {
+          const response = await apiGet('/queue/');
+          setQueueData(response || []);
+        } catch (err) {
+          setError(err.message || 'Failed to update queue');
+        }
+      };
+      refetch();
     };
 
     onQueueUpdate(handleQueueUpdate);
@@ -182,10 +187,10 @@ export default function Dashboard() {
 
       {/* Bottom Navigation */}
       <div className="bottom-nav">
-        <button className="nav-item active">👥 Queue</button>
-        <button className="nav-item">📋 Triage</button>
-        <button className="nav-item">📊 Reports</button>
-        <button className="nav-item">👤 Profile</button>
+        <button className="nav-item active" onClick={() => navigate('/staff/dashboard')}>👥 Queue</button>
+        <button className="nav-item" onClick={() => navigate('/staff/triage')}>📋 Triage</button>
+        <button className="nav-item" onClick={() => navigate('/staff/reports')}>📊 Reports</button>
+        <button className="nav-item" onClick={() => navigate('/staff/profile')}>👤 Profile</button>
       </div>
     </div>
   );

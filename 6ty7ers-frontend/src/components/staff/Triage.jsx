@@ -61,8 +61,6 @@ export default function Triage() {
       await apiPost(`/triage/${sessionId}`, {
         track_type: urgencyLevel,
         priority_score: null, // Backend calculates this
-        staff_id: staff.id,
-        notes: notes || null,
       });
 
       // Navigate back to dashboard after successful triage

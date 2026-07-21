@@ -12,9 +12,11 @@ export default function PatientApp() {
   const navigate = useNavigate();
   const [session, setSession] = useState(null);
   const [department, setDepartment] = useState('General Medicine');
+  const [phoneNumber, setPhoneNumber] = useState('');
 
   const handleCheckInComplete = (sessionData) => {
     setSession(sessionData);
+    setPhoneNumber(sessionData.phone_number || '');
     navigate(`/patient/department?sessionId=${sessionData.id}`);
   };
 
@@ -32,7 +34,7 @@ export default function PatientApp() {
       />
       <Route
         path="/verify"
-        element={<Verify onVerified={() => navigate('/patient/history')} onBack={() => navigate('/patient/checkin')} />}
+        element={<Verify phoneNumber={phoneNumber} onVerified={() => navigate('/patient/history')} onBack={() => navigate('/patient/checkin')} />}
       />
       <Route path="/history" element={<History onBack={() => navigate('/patient/checkin')} />} />
       <Route

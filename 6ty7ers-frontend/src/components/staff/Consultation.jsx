@@ -76,9 +76,7 @@ export default function Consultation() {
 
     try {
       // Call backend to mark consultation as complete
-      await apiPost(`/queue/${sessionId}/complete`, {
-        notes: notes || null,
-      });
+      await apiPost(`/queue/${sessionId}/complete`, {});
 
       // Navigate back to dashboard
       navigate('/staff/dashboard');
@@ -216,21 +214,14 @@ export default function Consultation() {
 
         {/* Error Message */}
         {error && <div className="error-message">{error}</div>}
-
-        {/* AI Assist Button (placeholder) */}
-        <div className="ai-assist-section">
-          <button type="button" className="ai-assist-btn">
-            🤖 AI assist
-          </button>
-        </div>
       </form>
 
       {/* Bottom Navigation */}
       <div className="bottom-nav">
-        <button className="nav-item">👥 Queue</button>
-        <button className="nav-item">📋 Triage</button>
-        <button className="nav-item">📊 Reports</button>
-        <button className="nav-item">👤 Profile</button>
+        <button className="nav-item" onClick={() => navigate('/staff/dashboard')}>👥 Queue</button>
+        <button className="nav-item" onClick={() => navigate('/staff/triage')}>📋 Triage</button>
+        <button className="nav-item" onClick={() => navigate('/staff/reports')}>📊 Reports</button>
+        <button className="nav-item" onClick={() => navigate('/staff/profile')}>👤 Profile</button>
       </div>
     </div>
   );
