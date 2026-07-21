@@ -1,53 +1,39 @@
 import React, { useState } from 'react';
 import { Routes, Route, useNavigate } from 'react-router-dom';
 import Welcome from '../components/patient/Welcome';
-import CheckIn from '../components/patient/CheckIn';
+import PhoneEntry from '../components/patient/PhoneEntry';
 import Verify from '../components/patient/Verify';
 import History from '../components/patient/History';
-import Department from '../components/patient/Department';
-import Token from '../components/patient/Token';
 import LiveQueue from '../components/patient/LiveQueue';
 
 export default function PatientApp() {
   const navigate = useNavigate();
-  const [session, setSession] = useState(null);
-  const [department, setDepartment] = useState('General Medicine');
   const [phoneNumber, setPhoneNumber] = useState('');
 
-  const handleCheckInComplete = (sessionData) => {
-    setSession(sessionData);
-    setPhoneNumber(sessionData.phone_number || '');
-    navigate(`/patient/department?sessionId=${sessionData.id}`);
-  };
-
-  const handleDepartmentSelect = (dept) => {
-    setDepartment(dept.name);
-    navigate(`/patient/token?dept=${dept.name}`);
+  const handlePhoneSubmit = (phone) => {
+    setPhoneNumber(phone);
+    navigate('/patient/verify');
   };
 
   return (
     <Routes>
-      <Route path="/" element={<Welcome onGetStarted={() => navigate('/patient/checkin')} />} />
+      <Route path="/" element={<Welcome onGetStarted={() => navigate('/patient/phone')} />} />
       <Route
-        path="/checkin"
-        element={<CheckIn onCheckInComplete={handleCheckInComplete} onViewHistory={() => navigate('/patient/verify')} />}
+        path="/phone"
+        element={<PhoneEntry onPhoneSubmit={handlePhoneSubmit} onBack={() => navigate('/patient')} />}
       />
       <Route
         path="/verify"
-        element={<Verify phoneNumber={phoneNumber} onVerified={() => navigate('/patient/history')} onBack={() => navigate('/patient/checkin')} />}
-      />
-      <Route path="/history" element={<History onBack={() => navigate('/patient/checkin')} />} />
-      <Route
-        path="/department"
-        element={<Department onDepartmentSelect={handleDepartmentSelect} onBack={() => navigate('/patient/checkin')} />}
+        element={<Verify phoneNumber={phoneNumber} onVerified={() => navigate('/patient/queue')} onBack={() => navigate('/patient/phone')} />}
       />
       <Route
-        path="/token"
-        element={<Token sessionData={session} onContinue={() => navigate('/patient/live-queue')} />}
-      />
-      <Route
-        path="/live-queue"
-        element={<LiveQueue token={session?.public_token || 'FT-405'} department={department} />}
+        path="/queue"
+        element={
+          <div>
+            <History onBack={() => navigate('/patient/phone')} />
+            <LiveQueue token="FT-405" department="General Medicine" />
+          </div>
+        }
       />
     </Routes>
   );

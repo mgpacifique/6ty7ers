@@ -96,7 +96,12 @@ export default function Dashboard() {
           <h1>Hello, {staff.username}</h1>
           <p>General Medicine - Today</p>
         </div>
-        <button onClick={handleLogout} className="logout-btn">Logout</button>
+        <div className="header-actions">
+          <button onClick={() => navigate('/staff/check-in')} className="checkin-btn">
+            ➕ Check In Patient
+          </button>
+          <button onClick={handleLogout} className="logout-btn">Logout</button>
+        </div>
       </div>
 
       {/* Error Message */}

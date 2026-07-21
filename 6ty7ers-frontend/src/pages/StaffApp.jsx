@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { Routes, Route, useNavigate } from 'react-router-dom';
 import Login from '../components/staff/Login';
+import CheckIn from '../components/staff/CheckIn';
 import Dashboard from '../components/staff/Dashboard';
 import Triage from '../components/staff/Triage';
 import Consultation from '../components/staff/Consultation';
@@ -25,6 +26,14 @@ export default function StaffApp() {
   return (
     <Routes>
       <Route path="/" element={<Login onLoginSuccess={handleLoginSuccess} />} />
+      <Route
+        path="/check-in"
+        element={
+          <ProtectedRoute>
+            <CheckIn />
+          </ProtectedRoute>
+        }
+      />
       <Route
         path="/dashboard"
         element={
