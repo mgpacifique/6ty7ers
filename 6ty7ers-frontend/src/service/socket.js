@@ -1,4 +1,13 @@
-const WS_URL = import.meta.env.VITE_SOCKET_URL || 'ws://localhost:8000/ws';
+const getWsUrl = () => {
+  if (import.meta.env.VITE_SOCKET_URL) return import.meta.env.VITE_SOCKET_URL;
+  if (typeof window !== 'undefined' && window.location?.hostname) {
+    const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
+    return `${protocol}//${window.location.hostname}:8000/ws`;
+  }
+  return 'ws://localhost:8000/ws';
+};
+
+const WS_URL = getWsUrl();
 
 let socket = null;
 const eventListeners = {};
