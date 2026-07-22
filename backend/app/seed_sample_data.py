@@ -35,13 +35,17 @@ SAMPLE_PATIENTS = [
 
 SAMPLE_TOKENS = ["EM-101", "EM-102", "FT-201", "FT-202", "FT-203", "FT-204"]
 
+SAMPLE_DEPARTMENTS = ["General Medicine", "Emergency / Urgent", "Pediatrics", "Pharmacy"]
+
 
 def minutes_ago(minutes):
     return datetime.now(timezone.utc) - timedelta(minutes=minutes)
 
 
 def clear_sample_data(db):
-    # Sessions go first because they hold foreign keys to patients and staff
+    # Sessions go first because they hold foreign keys to patients and staff.
+    # Departments are deliberately NOT deleted: they are shared reference data
+    # that real (non-seed) sessions may point at, so we reuse them instead.
     db.query(models.QueueSession).filter(
         models.QueueSession.public_token.in_(SAMPLE_TOKENS)
     ).delete(synchronize_session=False)
@@ -78,6 +82,20 @@ def seed_staff(db):
     return staff_by_username
 
 
+def seed_departments(db):
+    departments_by_name = {}
+    for name in SAMPLE_DEPARTMENTS:
+        department = db.query(models.Department).filter(
+            models.Department.name == name
+        ).first()
+        if not department:
+            department = models.Department(name=name)
+            db.add(department)
+        departments_by_name[name] = department
+    db.flush()
+    return departments_by_name
+
+
 def seed_patients(db):
     patients = []
     for full_name, phone_number in SAMPLE_PATIENTS:
@@ -88,7 +106,7 @@ def seed_patients(db):
     return patients
 
 
-def seed_sessions(db, patients, staff):
+def seed_sessions(db, patients, staff, departments):
     nurse = staff["nurse_grace"]
     doctor = staff["doctor_jean"]
     urgent = models.TrackTypeEnum.URGENT.value
@@ -97,6 +115,7 @@ def seed_sessions(db, patients, staff):
     sessions = [
         models.QueueSession(
             patient_id=patients[0].id,
+            department_id=departments["Emergency / Urgent"].id,
             public_token="EM-101",
             track_type=urgent,
             priority_score=100,
@@ -106,6 +125,7 @@ def seed_sessions(db, patients, staff):
         ),
         models.QueueSession(
             patient_id=patients[1].id,
+            department_id=departments["Emergency / Urgent"].id,
             public_token="EM-102",
             track_type=urgent,
             priority_score=100,
@@ -117,6 +137,7 @@ def seed_sessions(db, patients, staff):
         ),
         models.QueueSession(
             patient_id=patients[2].id,
+            department_id=departments["General Medicine"].id,
             public_token="FT-201",
             track_type=routine,
             priority_score=10,
@@ -126,6 +147,7 @@ def seed_sessions(db, patients, staff):
         ),
         models.QueueSession(
             patient_id=patients[3].id,
+            department_id=departments["Pediatrics"].id,
             public_token="FT-202",
             track_type=routine,
             priority_score=10,
@@ -136,6 +158,7 @@ def seed_sessions(db, patients, staff):
         # Completed visit with all three timestamps: true wait = T2 - T1 = 24 min
         models.QueueSession(
             patient_id=patients[4].id,
+            department_id=departments["Pharmacy"].id,
             public_token="FT-203",
             track_type=routine,
             priority_score=10,
@@ -146,7 +169,7 @@ def seed_sessions(db, patients, staff):
             triaged_by_staff_id=nurse.id,
             consulted_by_staff_id=doctor.id,
         ),
-        # Fresh check-in, not triaged yet, so no track
+        # Fresh check-in, not triaged yet: no track and no department assigned yet
         models.QueueSession(
             patient_id=patients[0].id,
             public_token="FT-204",
@@ -182,12 +205,14 @@ def main():
     try:
         clear_sample_data(db)
         staff = seed_staff(db)
+        departments = seed_departments(db)
         patients = seed_patients(db)
-        sessions = seed_sessions(db, patients, staff)
+        sessions = seed_sessions(db, patients, staff, departments)
         logs = seed_logs(db)
         db.commit()
-        print(f"Seeded {len(staff)} staff, {len(patients)} patients, "
-              f"{len(sessions)} queue sessions, {len(logs)} system logs.")
+        print(f"Seeded {len(staff)} staff, {len(departments)} departments, "
+              f"{len(patients)} patients, {len(sessions)} queue sessions, "
+              f"{len(logs)} system logs.")
     finally:
         db.close()
 
