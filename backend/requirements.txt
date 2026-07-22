@@ -1,0 +1,10 @@
+fastapi
+uvicorn[standard]
+sqlalchemy
+alembic
+psycopg2-binary
+python-dotenv
+passlib[bcrypt]
+python-multipart
+bcrypt
+twilio==9.10.9
