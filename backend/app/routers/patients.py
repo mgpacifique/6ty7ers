@@ -74,8 +74,10 @@ def check_in(
     broadcast_queue_stats(db, background_tasks)
     
     # Send Welcome SMS
+    import os
     from ..services.sms import send_sms
-    welcome_msg = f"Welcome to 6ty7ers Clinic. Your queue token is {db_session.public_token}. Go to http://127.0.0.1:8000 to log in using this phone number and track your wait time."
+    frontend_url = os.getenv("FRONTEND_URL", "http://2.28.15.135")
+    welcome_msg = f"Welcome to 6ty7ers Clinic. Your queue token is {db_session.public_token}. Go to {frontend_url} to log in using this phone number and track your wait time."
     background_tasks.add_task(send_sms, db_patient.phone_number, welcome_msg)
     
     return db_session
