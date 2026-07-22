@@ -1,0 +1,55 @@
+.live-queue-container {
+  max-width: 420px;
+  margin: 0 auto;
+  padding: 24px;
+}
+
+.live-queue-eyebrow {
+  font-size: 11px;
+  letter-spacing: 1px;
+  color: #6b7280;
+}
+
+.live-token-card {
+  background: #17181a;
+  color: white;
+  border-radius: 14px;
+  padding: 24px;
+  margin-top: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.live-token-label { font-size: 11px; color: #9ca3af; }
+.live-token-value { font-size: 34px; font-weight: 700; }
+.live-token-status { font-size: 13px; color: #a7f3d0; margin-top: 6px; }
+
+.live-stats-row {
+  display: flex;
+  gap: 12px;
+  margin-top: 16px;
+}
+
+.live-stat {
+  flex: 1;
+  background: #f4f6f8;
+  border-radius: 10px;
+  padding: 12px;
+  text-align: center;
+}
+
+.live-stat-label { display: block; font-size: 11px; color: #6b7280; }
+.live-stat-value { display: block; font-size: 20px; font-weight: 700; }
+
+.live-note {
+  margin-top: 20px;
+  font-size: 12px;
+  color: #6b7280;
+  text-align: center;
+}
+
+@media (max-width: 480px) {
+  .live-queue-container { padding: 16px; }
+  .live-stats-row { flex-direction: column; }
+}
