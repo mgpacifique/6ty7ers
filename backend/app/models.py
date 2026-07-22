@@ -52,6 +52,17 @@ class Staff(Base):
     triaged_sessions = relationship("QueueSession", foreign_keys="[QueueSession.triaged_by_staff_id]", back_populates="triaged_by")
     consulted_sessions = relationship("QueueSession", foreign_keys="[QueueSession.consulted_by_staff_id]", back_populates="consulted_by")
 
+# Department table
+
+class Department(Base):
+    __tablename__ = "departments"
+
+    id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
+    name = Column(String, unique=True, nullable=False) # e.g., General Medicine
+    created_at = Column(DateTime(timezone=True), default=lambda: datetime.now(timezone.utc))
+
+    sessions = relationship("QueueSession", back_populates="department")
+
 # Queue session table
 
 class QueueSession(Base):
@@ -59,12 +70,13 @@ class QueueSession(Base):
 
     id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
     patient_id = Column(UUID(as_uuid=True), ForeignKey("patients.id"), nullable=False)
-    
+    department_id = Column(UUID(as_uuid=True), ForeignKey("departments.id"), nullable=True)
+
     public_token = Column(String, unique=True, index=True, nullable=False) # e.g., FT-405
     track_type = Column(String, nullable=True) # "Urgent", "Routine" - set after triage
     priority_score = Column(Integer, default=0)
-    status = Column(String, default=StatusEnum.REGISTERED.value) 
-    
+    status = Column(String, default=StatusEnum.REGISTERED.value)
+
     t1_check_in = Column(DateTime(timezone=True), default=lambda: datetime.now(timezone.utc))
     t2_called = Column(DateTime(timezone=True), nullable=True)
     t3_completed = Column(DateTime(timezone=True), nullable=True)
@@ -73,6 +85,7 @@ class QueueSession(Base):
     consulted_by_staff_id = Column(UUID(as_uuid=True), ForeignKey("staff.id"), nullable=True)
 
     patient = relationship("Patient", back_populates="sessions")
+    department = relationship("Department", back_populates="sessions")
     triaged_by = relationship("Staff", foreign_keys=[triaged_by_staff_id], back_populates="triaged_sessions")
     consulted_by = relationship("Staff", foreign_keys=[consulted_by_staff_id], back_populates="consulted_sessions")
 
