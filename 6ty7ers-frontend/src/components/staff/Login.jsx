@@ -1,6 +1,5 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { apiPost } from '../../service/api';
 
 export default function Login() {
   const navigate = useNavigate();
@@ -15,11 +14,31 @@ export default function Login() {
     setError('');
 
     try {
-      // Call backend login API
-      const response = await apiPost('/auth/login', {
-        username: username,
-        password: password,
+      // Call backend login API with form data (OAuth2PasswordRequestForm)
+      const formData = new FormData();
+      formData.append('username', username);
+      formData.append('password', password);
+
+      const API_BASE = import.meta.env.VITE_API_BASE || 'http://localhost:8000';
+      const token = localStorage.getItem('access_token');
+      const res = await fetch(`${API_BASE}/auth/login`, {
+        method: 'POST',
+        headers: {
+          ...(token && { Authorization: `Bearer ${token}` }),
+        },
+        body: formData,
       });
+
+      if (res.status === 401) {
+        throw new Error('Invalid username or password');
+      }
+
+      if (!res.ok) {
+        const err = await res.json().catch(() => ({}));
+        throw new Error(err.detail || 'Login failed');
+      }
+
+      const response = await res.json();
 
       // Store token and staff data
       localStorage.setItem('access_token', response.access_token);

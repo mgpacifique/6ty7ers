@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { apiPost } from '../../service/api';
-import './phoneEntry.css';
+// import './phoneEntry.css';
 
 export default function PhoneEntry({ onPhoneSubmit, onBack }) {
   const [phoneNumber, setPhoneNumber] = useState('');
