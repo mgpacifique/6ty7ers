@@ -8,8 +8,8 @@ rows loaded by `backend/app/seed_sample_data.py`.
 ## Entity overview
 
 ```
-patients 1 ──── * queue_sessions * ──── 1 staff   (triaged_by / consulted_by)
-                      │
+patients 1 ──── * queue_sessions * ──── 1 staff       (triaged_by / consulted_by)
+                      │         * ──── 1 departments
                       └── events recorded in system_logs
 ```
 
@@ -35,6 +35,18 @@ displays only ever use `queue_sessions.public_token`.
 | role | VARCHAR | NOT NULL | `Admin`, `Nurse` or `Doctor` |
 | created_at | TIMESTAMPTZ | | |
 
+## Table: departments
+
+Which part of the hospital a session belongs to (General Medicine, Emergency /
+Urgent, Pediatrics, Pharmacy, ...). Optional on a session until triage/routing
+assigns one.
+
+| Column | Type | Key / Constraint | Notes |
+|---|---|---|---|
+| id | UUID | PK | |
+| name | VARCHAR | UNIQUE, NOT NULL | e.g. `General Medicine` |
+| created_at | TIMESTAMPTZ | | |
+
 ## Table: queue_sessions
 
 One row per patient visit. This is the queue itself.
@@ -43,6 +55,7 @@ One row per patient visit. This is the queue itself.
 |---|---|---|---|
 | id | UUID | PK | |
 | patient_id | UUID | FK → patients.id, NOT NULL | |
+| department_id | UUID | FK → departments.id, nullable | set once the patient is routed to a department |
 | public_token | VARCHAR | UNIQUE, NOT NULL, indexed | `EM-###` urgent, `FT-###` routine |
 | track_type | VARCHAR | nullable | `Urgent` or `Routine`, set at triage |
 | priority_score | INTEGER | default 0 | calculated by the Smart Logic Engine |
@@ -86,6 +99,15 @@ nothing else.
 Passwords are stored bcrypt-hashed; the plain values above exist only for
 local testing.
 
+### departments (4 rows)
+
+| name |
+|---|
+| General Medicine |
+| Emergency / Urgent |
+| Pediatrics |
+| Pharmacy |
+
 ### patients (5 rows)
 
 | full_name | phone_number |
@@ -98,16 +120,16 @@ local testing.
 
 ### queue_sessions (6 rows)
 
-Covers both tracks, every status in the lifecycle, and all three FKs.
+Covers both tracks, every status in the lifecycle, and all four FKs.
 
-| public_token | track_type | status | priority | T1 | T2 | T3 | triaged_by | consulted_by |
-|---|---|---|---|---|---|---|---|---|
-| EM-101 | Urgent | Waiting | 100 | −40 min | | | nurse_grace | |
-| EM-102 | Urgent | Called | 100 | −25 min | −5 min | | nurse_grace | doctor_jean |
-| FT-201 | Routine | Waiting | 10 | −30 min | | | nurse_grace | |
-| FT-202 | Routine | Triaged | 10 | −20 min | | | nurse_grace | |
-| FT-203 | Routine | Completed | 10 | −90 min | −66 min | −50 min | nurse_grace | doctor_jean |
-| FT-204 | | Registered | 0 | −2 min | | | | |
+| public_token | department | track_type | status | priority | T1 | T2 | T3 | triaged_by | consulted_by |
+|---|---|---|---|---|---|---|---|---|---|
+| EM-101 | Emergency / Urgent | Urgent | Waiting | 100 | −40 min | | | nurse_grace | |
+| EM-102 | Emergency / Urgent | Urgent | Called | 100 | −25 min | −5 min | | nurse_grace | doctor_jean |
+| FT-201 | General Medicine | Routine | Waiting | 10 | −30 min | | | nurse_grace | |
+| FT-202 | Pediatrics | Routine | Triaged | 10 | −20 min | | | nurse_grace | |
+| FT-203 | Pharmacy | Routine | Completed | 10 | −90 min | −66 min | −50 min | nurse_grace | doctor_jean |
+| FT-204 | (none yet) | | Registered | 0 | −2 min | | | | |
 
 Times are offsets from the moment the seed runs. FT-203 demonstrates the KPI:
 true wait = T2 − T1 = 24 minutes.
