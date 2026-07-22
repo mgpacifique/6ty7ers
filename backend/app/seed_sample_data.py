@@ -56,6 +56,18 @@ def clear_sample_data(db):
     ).delete(synchronize_session=False)
 
     sample_usernames = [username for username, _, _ in SAMPLE_STAFF]
+    sample_staff_members = db.query(models.Staff).filter(models.Staff.username.in_(sample_usernames)).all()
+    sample_staff_ids = [s.id for s in sample_staff_members]
+
+    if sample_staff_ids:
+        db.query(models.QueueSession).filter(
+            models.QueueSession.triaged_by_staff_id.in_(sample_staff_ids)
+        ).update({models.QueueSession.triaged_by_staff_id: None}, synchronize_session=False)
+
+        db.query(models.QueueSession).filter(
+            models.QueueSession.consulted_by_staff_id.in_(sample_staff_ids)
+        ).update({models.QueueSession.consulted_by_staff_id: None}, synchronize_session=False)
+
     db.query(models.Staff).filter(
         models.Staff.username.in_(sample_usernames)
     ).delete(synchronize_session=False)
