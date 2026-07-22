@@ -13,7 +13,7 @@ A full-stack healthcare queue management application designed to streamline pati
 | **Patient Portal** | [http://2.28.15.135/patient](http://2.28.15.135/patient) | Patient OTP login & queue tracker |
 | **Interactive API Docs** | [http://2.28.15.135:8000/docs](http://2.28.15.135:8000/docs) | Swagger UI API documentation |
 | **ReDoc API Docs** | [http://2.28.15.135:8000/redoc](http://2.28.15.135:8000/redoc) | Alternative API documentation |
-| **WebSocket Server** | `ws://2.28.15.135:8000/ws` | Real-time JSON broadcast stream |
+| **WebSocket Server** | `ws://2.28.15.135:8000/ws` | Programmatic WS endpoint (Use JS, Postman, or `test_ws.py`) |
 
 ---
 
