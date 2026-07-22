@@ -24,7 +24,7 @@ def request_otp(data: schemas.PatientOTPRequest, db: Session = Depends(get_db)):
     
     # Set expiration to 5 minutes from now
     patient.otp_code = otp_code
-    patient.otp_expires_at = datetime.now(timezone.utc).replace(tzinfo=None) + timedelta(minutes=5)
+    patient.otp_expires_at = datetime.now(timezone.utc) + timedelta(minutes=5)
     
     db.commit()
     
@@ -42,7 +42,7 @@ def verify_otp(data: schemas.PatientOTPVerify, db: Session = Depends(get_db)):
     if not patient.otp_code or patient.otp_code != data.otp_code:
         raise HTTPException(status_code=401, detail="Invalid OTP code")
         
-    if not patient.otp_expires_at or patient.otp_expires_at < datetime.now(timezone.utc).replace(tzinfo=None):
+    if not patient.otp_expires_at or patient.otp_expires_at < datetime.now(timezone.utc):
         raise HTTPException(status_code=401, detail="OTP code has expired")
         
     # Clear the OTP once used

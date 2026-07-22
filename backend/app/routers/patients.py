@@ -12,9 +12,11 @@ router = APIRouter(
     tags=["Patients"]
 )
 
-def generate_public_token():
-    # Example generator: FT-405
-    return f"FT-{random.randint(100, 999)}"
+def generate_public_token(db: Session):
+    while True:
+        token = f"FT-{random.randint(100, 9999)}"
+        if not db.query(models.QueueSession).filter(models.QueueSession.public_token == token).first():
+            return token
 
 @router.post("/check-in", response_model=schemas.QueueSessionResponse, status_code=status.HTTP_201_CREATED)
 def check_in(
@@ -38,7 +40,7 @@ def check_in(
     # 2. Create QueueSession
     db_session = models.QueueSession(
         patient_id=db_patient.id,
-        public_token=generate_public_token(),
+        public_token=generate_public_token(db),
         status=models.StatusEnum.REGISTERED.value
     )
     db.add(db_session)
