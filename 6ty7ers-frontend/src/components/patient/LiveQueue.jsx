@@ -8,7 +8,15 @@ export default function LiveQueue({ token, department }) {
   const [stats, setStats] = useState(null);
 
   useEffect(() => {
-    const socket = new WebSocket('ws://localhost:8000/ws');
+    const getWsUrl = () => {
+      if (import.meta.env.VITE_SOCKET_URL) return import.meta.env.VITE_SOCKET_URL;
+      if (typeof window !== 'undefined' && window.location?.hostname) {
+        const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
+        return `${protocol}//${window.location.hostname}:8000/ws`;
+      }
+      return 'ws://localhost:8000/ws';
+    };
+    const socket = new WebSocket(getWsUrl());
 
     socket.onmessage = (event) => {
       const payload = JSON.parse(event.data);

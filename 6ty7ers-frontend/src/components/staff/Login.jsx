@@ -19,7 +19,14 @@ export default function Login() {
       formData.append('username', username);
       formData.append('password', password);
 
-      const API_BASE = import.meta.env.VITE_API_BASE || 'http://localhost:8000';
+      const getApiBase = () => {
+        if (import.meta.env.VITE_API_BASE) return import.meta.env.VITE_API_BASE;
+        if (typeof window !== 'undefined' && window.location?.hostname) {
+          return `${window.location.protocol}//${window.location.hostname}:8000`;
+        }
+        return 'http://localhost:8000';
+      };
+      const API_BASE = getApiBase();
       const token = localStorage.getItem('access_token');
       const res = await fetch(`${API_BASE}/auth/login`, {
         method: 'POST',
