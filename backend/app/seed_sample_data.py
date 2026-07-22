@@ -43,7 +43,9 @@ def minutes_ago(minutes):
 
 
 def clear_sample_data(db):
-    # Sessions go first because they hold foreign keys to patients, staff and departments
+    # Sessions go first because they hold foreign keys to patients and staff.
+    # Departments are deliberately NOT deleted: they are shared reference data
+    # that real (non-seed) sessions may point at, so we reuse them instead.
     db.query(models.QueueSession).filter(
         models.QueueSession.public_token.in_(SAMPLE_TOKENS)
     ).delete(synchronize_session=False)
@@ -56,10 +58,6 @@ def clear_sample_data(db):
     sample_usernames = [username for username, _, _ in SAMPLE_STAFF]
     db.query(models.Staff).filter(
         models.Staff.username.in_(sample_usernames)
-    ).delete(synchronize_session=False)
-
-    db.query(models.Department).filter(
-        models.Department.name.in_(SAMPLE_DEPARTMENTS)
     ).delete(synchronize_session=False)
 
     for token in SAMPLE_TOKENS:
@@ -87,8 +85,12 @@ def seed_staff(db):
 def seed_departments(db):
     departments_by_name = {}
     for name in SAMPLE_DEPARTMENTS:
-        department = models.Department(name=name)
-        db.add(department)
+        department = db.query(models.Department).filter(
+            models.Department.name == name
+        ).first()
+        if not department:
+            department = models.Department(name=name)
+            db.add(department)
         departments_by_name[name] = department
     db.flush()
     return departments_by_name
