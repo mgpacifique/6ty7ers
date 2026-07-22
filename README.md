@@ -4,6 +4,19 @@ A full-stack healthcare queue management application designed to streamline pati
 
 ---
 
+## 🌐 Live Deployment Links
+
+| Resource | URL | Description |
+| :--- | :--- | :--- |
+| **Frontend Application** | [http://2.28.15.135/](http://2.28.15.135/) | Main web application |
+| **Staff Portal** | [http://2.28.15.135/staff](http://2.28.15.135/staff) | Staff login & management dashboard |
+| **Patient Portal** | [http://2.28.15.135/patient](http://2.28.15.135/patient) | Patient OTP login & queue tracker |
+| **Interactive API Docs** | [http://2.28.15.135:8000/docs](http://2.28.15.135:8000/docs) | Swagger UI API documentation |
+| **ReDoc API Docs** | [http://2.28.15.135:8000/redoc](http://2.28.15.135:8000/redoc) | Alternative API documentation |
+| **WebSocket Server** | `ws://2.28.15.135:8000/ws` | Real-time JSON broadcast stream |
+
+---
+
 ## 🌟 Key Features
 
 ### 1. Dynamic Priority Queuing & Aging Algorithm
