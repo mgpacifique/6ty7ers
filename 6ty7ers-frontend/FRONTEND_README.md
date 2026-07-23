@@ -111,7 +111,7 @@ npm run lint
 
 **Base URL**: `http://localhost:8000`
 
-**Core Endpoints Used:**
+- **Core Endpoints Used:**
 - `POST /auth/login` - Staff login
 - `POST /patient-auth/request-otp` - Request OTP code
 - `POST /patient-auth/verify-otp` - Verify OTP and get token
@@ -119,6 +119,8 @@ npm run lint
 - `GET /queue/` - Get queue list
 - `POST /queue/{session_id}/call` - Call patient to room
 - `POST /queue/{session_id}/complete` - Mark consultation complete
+- `GET /history/patient` - Fetch patient visit history
+- `GET /history/staff` - Fetch staff/admin/doctor visit history
 - `WS /ws` - WebSocket for real-time queue events
 
 **Real-time Events:**
@@ -135,7 +137,7 @@ npm run lint
 | Feature | Dependencies | Status |
 |---------|---|---|
 | Department selection in check-in | Backend field support | 🔄 In Progress |
-| Patient history display | `GET /patient/history` endpoint | ⏳ Blocked |
+| Patient history display | `GET /history/patient` endpoint | ✅ Completed |
 | Session details in triage/consultation | `GET /queue-sessions/{id}` endpoint | ⏳ Blocked |
 | Analytics/Reports data | `GET /analytics` endpoint | ⏳ Blocked |
 
