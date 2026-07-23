@@ -1,4 +1,9 @@
-**/.env
+.venv/
 __pycache__/
 *.pyc
-*.db
+queuedb.db
+backend/.env
+node_modules/
+dist/
+.vite/
+careueue-lovable/.env
