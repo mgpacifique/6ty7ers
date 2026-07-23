@@ -76,8 +76,9 @@ A full-stack healthcare queue management application designed to streamline pati
 │   │   ├── schemas.py        # Pydantic data schemas
 │   │   ├── database.py       # DB engine & session connection
 │   │   ├── seed_sample_data.py # Sample data seeder script
-│   │   ├── routers/          # API Route handlers (auth, patients, triage, queue)
+│   │   ├── routers/          # API Route handlers (auth, patients, triage, queue, history)
 │   │   └── services/         # Business logic (SMS, WebSockets, auth)
+│   ├── test_history.py       # End-to-end history endpoints test script
 │   ├── test_otp.py           # End-to-end OTP flow test script
 │   ├── test_twilio.py        # End-to-end Twilio SMS test script
 │   ├── test_ws.py            # Real-time WebSocket test script

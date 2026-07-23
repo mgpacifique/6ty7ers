@@ -58,6 +58,11 @@ Once the server is running, interactive API documentation is automatically gener
   - `GET /queue/`: Returns the sorted list of active sessions (requires Staff/Nurse/Doctor role).
   - `POST /queue/{session_id}/call`: Marks a patient as being consulted.
   - `POST /queue/{session_id}/complete`: Marks a consultation as finished.
+- **History**
+  - `GET /history/patient`: Patient visit history (also `GET /history/me`, `GET /patient/history`, requires Patient token).
+  - `GET /history/staff`: All visit history across patients with filters (`status`, `patient_id`, `department_id`, `limit`, `offset`).
+  - `GET /history/staff/me`: Visit sessions triaged or consulted by the authenticated staff member.
+  - `GET /history/patient/{patient_id}`: Visit history lookup for a specific patient ID (requires Staff role).
 - **WebSocket**
   - `WS /ws`: Endpoint for real-time JSON event streams.
 
