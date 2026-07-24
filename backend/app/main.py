@@ -1,6 +1,6 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-from .routers import auth, patients, triage, ws, queue, patient_auth, history
+from .routers import auth, patients, triage, ws, queue, patient_auth, history, analytics
 
 app = FastAPI(title="Queue Management API")
 
@@ -21,6 +21,7 @@ app.include_router(triage.router)
 app.include_router(ws.router)
 app.include_router(queue.router)
 app.include_router(history.router)
+app.include_router(analytics.router)
 
 @app.get("/health")
 def health_check():
