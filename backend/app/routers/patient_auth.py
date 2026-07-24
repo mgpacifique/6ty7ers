@@ -1,6 +1,6 @@
 import random
 from datetime import datetime, timedelta, timezone
-from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi import APIRouter, Depends, HTTPException, status, BackgroundTasks
 from sqlalchemy.orm import Session
 
 from .. import schemas, models
@@ -14,7 +14,7 @@ router = APIRouter(
 )
 
 @router.post("/request-otp")
-def request_otp(data: schemas.PatientOTPRequest, db: Session = Depends(get_db)):
+def request_otp(data: schemas.PatientOTPRequest, background_tasks: BackgroundTasks, db: Session = Depends(get_db)):
     patient = db.query(models.Patient).filter(models.Patient.phone_number == data.phone_number).first()
     if not patient:
         raise HTTPException(status_code=404, detail="No patient found with this phone number")
@@ -29,7 +29,7 @@ def request_otp(data: schemas.PatientOTPRequest, db: Session = Depends(get_db)):
     db.commit()
     
     # Send SMS
-    send_sms(patient.phone_number, f"Your 6ty7ers Clinic login code is: {otp_code}")
+    background_tasks.add_task(send_sms, patient.phone_number, f"Your 6ty7ers Clinic login code is: {otp_code}")
     
     return {"message": "OTP sent successfully"}
 
