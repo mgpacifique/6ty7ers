@@ -31,7 +31,7 @@ def request_otp(data: schemas.PatientOTPRequest, background_tasks: BackgroundTas
     # Send SMS
     background_tasks.add_task(send_sms, patient.phone_number, f"Your 6ty7ers Clinic login code is: {otp_code}")
     
-    return {"message": "OTP sent successfully"}
+    return {"message": "OTP sent successfully", "dev_otp": otp_code}
 
 @router.post("/verify-otp")
 def verify_otp(data: schemas.PatientOTPVerify, db: Session = Depends(get_db)):
@@ -41,8 +41,13 @@ def verify_otp(data: schemas.PatientOTPVerify, db: Session = Depends(get_db)):
     
     if not patient.otp_code or patient.otp_code != data.otp_code:
         raise HTTPException(status_code=401, detail="Invalid OTP code")
-        
-    if not patient.otp_expires_at or patient.otp_expires_at < datetime.now(timezone.utc):
+
+    # Handle both naive and aware datetimes
+    otp_expires = patient.otp_expires_at
+    if otp_expires and otp_expires.tzinfo is None:
+        otp_expires = otp_expires.replace(tzinfo=timezone.utc)
+
+    if not otp_expires or otp_expires < datetime.now(timezone.utc):
         raise HTTPException(status_code=401, detail="OTP code has expired")
         
     # Clear the OTP once used

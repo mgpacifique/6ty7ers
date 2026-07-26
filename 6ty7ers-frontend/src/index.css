@@ -1,6 +1,15 @@
-*{
-  margin:0;
-  padding:0;
-  font-family: 'Roboto', sans-serif;
-  
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Instrument+Serif:wght@400&display=swap');
+
+@import './compiled-styles.css';
+
+/* Manual overrides to make the dashboard visible on smaller desktop screens without compiling */
+@media (min-width: 768px) {
+  .lg\:flex { display: flex !important; }
+  .lg\:hidden { display: none !important; }
+  .lg\:grid-cols-2 { grid-template-columns: repeat(2, minmax(0, 1fr)) !important; }
+  .lg\:grid-cols-4 { grid-template-columns: repeat(4, minmax(0, 1fr)) !important; }
+  .lg\:grid-cols-\[240px_1fr\] { grid-template-columns: 240px 1fr !important; }
+  .lg\:flex-col { flex-direction: column !important; }
+  .lg\:p-8 { padding: 2rem !important; }
+  .lg\:px-8 { padding-left: 2rem !important; padding-right: 2rem !important; }
 }

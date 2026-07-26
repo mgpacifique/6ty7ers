@@ -47,6 +47,7 @@ class Staff(Base):
     username = Column(String, unique=True, index=True, nullable=False)
     password_hash = Column(String, nullable=False)
     role = Column(String, nullable=False) # Using String instead of strict Enum per ERD
+    department_id = Column(UUID(as_uuid=True), ForeignKey("departments.id"), nullable=True)
     created_at = Column(DateTime(timezone=True), default=lambda: datetime.now(timezone.utc))
 
     triaged_sessions = relationship("QueueSession", foreign_keys="[QueueSession.triaged_by_staff_id]", back_populates="triaged_by")
@@ -74,6 +75,7 @@ class QueueSession(Base):
 
     public_token = Column(String, unique=True, index=True, nullable=False) # e.g., FT-405
     track_type = Column(String, nullable=True) # "Urgent", "Routine" - set after triage
+    reason = Column(String, nullable=True)
     priority_score = Column(Integer, default=0)
     status = Column(String, default=StatusEnum.REGISTERED.value)
 

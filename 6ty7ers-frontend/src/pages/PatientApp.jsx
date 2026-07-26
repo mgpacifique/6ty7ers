@@ -10,6 +10,10 @@ export default function PatientApp() {
   const navigate = useNavigate();
   const [phoneNumber, setPhoneNumber] = useState('');
 
+  // Get patient data from localStorage (set after OTP verification)
+  const patientToken = localStorage.getItem('patient_token') || 'FT-000';
+  const patientDept = localStorage.getItem('patient_department') || 'General Medicine';
+
   const handlePhoneSubmit = (phone) => {
     setPhoneNumber(phone);
     navigate('/patient/verify');
@@ -28,12 +32,11 @@ export default function PatientApp() {
       />
       <Route
         path="/queue"
-        element={
-          <div>
-            <History onBack={() => navigate('/patient/phone')} />
-            <LiveQueue token="FT-405" department="General Medicine" />
-          </div>
-        }
+        element={<LiveQueue token={patientToken} department={patientDept} />}
+      />
+      <Route
+        path="/history"
+        element={<History onBack={() => navigate('/patient/queue')} />}
       />
     </Routes>
   );

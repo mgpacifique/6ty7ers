@@ -2,6 +2,7 @@ import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import PatientApp from './pages/PatientApp';
 import StaffApp from './pages/StaffApp';
 import Landing from './pages/Landing';
+import TvDisplay from './components/TvDisplay';
 import ErrorBoundary from './components/ErrorBoundary';
 
 export default function App() {
@@ -12,6 +13,7 @@ export default function App() {
           <Route path="/" element={<Landing />} />
           <Route path="/patient/*" element={<PatientApp />} />
           <Route path="/staff/*" element={<StaffApp />} />
+          <Route path="/tv" element={<TvDisplay />} />
         </Routes>
       </Router>
     </ErrorBoundary>

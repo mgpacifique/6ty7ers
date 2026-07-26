@@ -12,7 +12,7 @@ from fastapi import Depends, HTTPException, status
 from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
 from sqlalchemy.orm import Session
 
-from .. import models
+from .. import models, schemas
 from ..database import get_db
 
 security_scheme = HTTPBearer(auto_error=False)
@@ -64,19 +64,24 @@ def decode_access_token(token: str) -> dict:
     try:
         header_segment, payload_segment, signature = token.split(".", 2)
     except ValueError as exc:
+        print(f"[AUTH] Token format error: {exc}")
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid token") from exc
 
     expected_signature = _sign(f"{header_segment}.{payload_segment}")
     if not hmac.compare_digest(signature, expected_signature):
+        print(f"[AUTH] Signature mismatch - got {signature[:10]}... expected {expected_signature[:10]}...")
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid token")
 
     try:
         payload = json.loads(_base64url_decode(payload_segment).decode())
     except (ValueError, json.JSONDecodeError) as exc:
+        print(f"[AUTH] Payload decode error: {exc}")
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid token") from exc
 
     expires_at = datetime.fromtimestamp(payload.get("exp", 0), tz=timezone.utc)
-    if expires_at <= datetime.now(timezone.utc):
+    now = datetime.now(timezone.utc)
+    if expires_at <= now:
+        print(f"[AUTH] Token expired - expires: {expires_at}, now: {now}, diff: {(expires_at - now).total_seconds()}s")
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Token expired")
 
     return payload
@@ -93,6 +98,20 @@ def authenticate_staff(db: Session, username: str, password: str) -> models.Staf
     if not verify_password(password, staff.password_hash):
         return None
     return staff
+
+
+def register_staff(db: Session, staff_data: schemas.StaffRegister) -> models.Staff:
+    hashed_password = bcrypt.hashpw(staff_data.password.encode(), bcrypt.gensalt(4)).decode()
+    new_staff = models.Staff(
+        username=staff_data.username,
+        password_hash=hashed_password,
+        role=staff_data.role,
+        department_id=staff_data.department_id
+    )
+    db.add(new_staff)
+    db.commit()
+    db.refresh(new_staff)
+    return new_staff
 
 
 def get_current_staff(
