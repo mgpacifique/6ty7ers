@@ -12,7 +12,7 @@ from fastapi import Depends, HTTPException, status
 from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
 from sqlalchemy.orm import Session
 
-from .. import models
+from .. import models, schemas
 from ..database import get_db
 
 security_scheme = HTTPBearer(auto_error=False)
@@ -98,6 +98,19 @@ def authenticate_staff(db: Session, username: str, password: str) -> models.Staf
     if not verify_password(password, staff.password_hash):
         return None
     return staff
+
+
+def register_staff(db: Session, staff_data: schemas.StaffRegister) -> models.Staff:
+    hashed_password = bcrypt.hashpw(staff_data.password.encode(), bcrypt.gensalt()).decode()
+    new_staff = models.Staff(
+        username=staff_data.username,
+        password_hash=hashed_password,
+        role=staff_data.role
+    )
+    db.add(new_staff)
+    db.commit()
+    db.refresh(new_staff)
+    return new_staff
 
 
 def get_current_staff(

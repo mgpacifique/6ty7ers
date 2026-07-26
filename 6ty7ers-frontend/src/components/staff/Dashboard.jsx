@@ -229,6 +229,18 @@ export default function Dashboard() {
               Refresh
             </button>
 
+            {staff.role === 'Admin' && (
+              <button
+                onClick={() => navigate('/staff/register')}
+                className="flex items-center gap-1 rounded-full bg-primary/10 px-3 py-1 text-[11px] font-semibold text-primary hover:bg-primary/20 transition"
+              >
+                <svg className="h-3 w-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 4v16m8-8H4"></path>
+                </svg>
+                Register Staff
+              </button>
+            )}
+
             <div className="hidden items-center gap-2 rounded-full border border-border bg-card px-3 py-1.5 sm:flex">
               <div className="grid h-6 w-6 place-items-center rounded-full bg-primary text-[10px] font-bold text-primary-foreground">
                 {staff.username?.substring(0, 2).toUpperCase() || 'DR'}

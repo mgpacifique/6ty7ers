@@ -7,6 +7,7 @@ import Triage from '../components/staff/Triage';
 import Consultation from '../components/staff/Consultation';
 import Reports from '../components/staff/Reports';
 import Profile from '../components/staff/Profile';
+import RegisterStaff from '../components/staff/Register';
 import ProtectedRoute from '../components/ProtectedRoute';
 
 export default function StaffApp() {
@@ -71,6 +72,14 @@ export default function StaffApp() {
         element={
           <ProtectedRoute>
             <Profile />
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/register"
+        element={
+          <ProtectedRoute>
+            <RegisterStaff />
           </ProtectedRoute>
         }
       />

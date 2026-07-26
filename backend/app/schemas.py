@@ -30,6 +30,11 @@ class StaffOut(BaseModel):
     class Config:
         from_attributes = True
 
+class StaffRegister(BaseModel):
+    username: str
+    password: str
+    role: str
+
 
 class AuthTokenResponse(BaseModel):
     access_token: str
