@@ -26,43 +26,37 @@ if [ ! -e "$data_path/conf/options-ssl-nginx.conf" ] || [ ! -e "$data_path/conf/
   echo
 fi
 
-echo "### Creating dummy certificate for $domains ..."
-path="/etc/letsencrypt/live/$domains"
-mkdir -p "$data_path/conf/live/$domains"
-docker compose run --rm --entrypoint "\
-  openssl req -x509 -nodes -newkey rsa:$rsa_key_size -days 1\
-    -keyout '$path/privkey.pem' \
-    -out '$path/fullchain.pem' \
-    -subj '/CN=localhost'" certbot
-echo
+echo "### Setting up temporary Nginx config for Let's Encrypt challenge..."
+cat > ./nginx/default.conf << 'EOF'
+server {
+    listen 80;
+    server_name booklogger.tech www.booklogger.tech;
+    
+    location /.well-known/acme-challenge/ {
+        root /var/www/certbot;
+    }
 
+    location / {
+        return 301 https://$host$request_uri;
+    }
+}
+EOF
 
-echo "### Starting nginx ..."
+echo "### Starting nginx (HTTP only for challenge) ..."
 docker compose up --force-recreate -d nginx
 echo
 
-echo "### Deleting dummy certificate for $domains ..."
-docker compose run --rm --entrypoint "\
-  rm -Rf /etc/letsencrypt/live/$domains && \
-  rm -Rf /etc/letsencrypt/archive/$domains && \
-  rm -Rf /etc/letsencrypt/renewal/$domains.conf" certbot
-echo
-
-
 echo "### Requesting Let's Encrypt certificate for $domains ..."
-#Join $domains to -d args
 domain_args=""
 for domain in "${domains[@]}"; do
   domain_args="$domain_args -d $domain"
 done
 
-# Select appropriate email arg
 case "$email" in
   "") email_arg="--register-unsafely-without-email" ;;
   *) email_arg="--email $email" ;;
 esac
 
-# Enable staging mode if needed
 if [ $staging != "0" ]; then staging_arg="--staging"; fi
 
 docker compose run --rm --entrypoint "\
@@ -75,5 +69,57 @@ docker compose run --rm --entrypoint "\
     --force-renewal" certbot
 echo
 
-echo "### Reloading nginx ..."
-docker compose exec nginx nginx -s reload
+echo "### Writing final Nginx config (with SSL and Proxy) ..."
+cat > ./nginx/default.conf << 'EOF'
+server {
+    listen 80;
+    server_name booklogger.tech www.booklogger.tech;
+    
+    location /.well-known/acme-challenge/ {
+        root /var/www/certbot;
+    }
+
+    location / {
+        return 301 https://$host$request_uri;
+    }
+}
+
+server {
+    listen 443 ssl;
+    server_name booklogger.tech www.booklogger.tech;
+
+    ssl_certificate /etc/letsencrypt/live/booklogger.tech/fullchain.pem;
+    ssl_certificate_key /etc/letsencrypt/live/booklogger.tech/privkey.pem;
+    
+    include /etc/letsencrypt/options-ssl-nginx.conf;
+    ssl_dhparam /etc/letsencrypt/ssl-dhparams.pem;
+
+    location / {
+        proxy_pass http://frontend:80;
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto $scheme;
+    }
+
+    location /api/ {
+        proxy_pass http://backend:8000/;
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto $scheme;
+    }
+    
+    location /ws/ {
+        proxy_pass http://backend:8000/ws/;
+        proxy_http_version 1.1;
+        proxy_set_header Upgrade $http_upgrade;
+        proxy_set_header Connection "Upgrade";
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+    }
+}
+EOF
+
+echo "### Restarting Nginx to apply SSL config ..."
+docker compose restart nginx
