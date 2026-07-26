@@ -25,9 +25,20 @@ export default function History() {
             minute: '2-digit',
             hour12: true,
           });
+
+          const calledTime = v.t2_called
+            ? new Date(v.t2_called).toLocaleTimeString('en-US', {
+                hour: 'numeric',
+                minute: '2-digit',
+                hour12: true,
+              })
+            : '—';
+
           const doctorName = v.consulted_by_staff_username
             ? `Dr. ${v.consulted_by_staff_username}`
             : (v.triaged_by_staff_username ? `Staff (${v.triaged_by_staff_username})` : 'Attending Staff');
+
+          const triagedBy = v.triaged_by_staff_username || '—';
           const deptName = v.department_name || 'General Medicine';
           const waitStr = v.wait_time_minutes !== null && v.wait_time_minutes !== undefined
             ? `${Math.round(v.wait_time_minutes)}m`
@@ -43,6 +54,8 @@ export default function History() {
             doctor: doctorName,
             dept: deptName,
             checkInTime,
+            calledTime,
+            triagedBy,
             wait: waitStr,
             consultTime: consultStr,
             status: v.status,
@@ -61,7 +74,7 @@ export default function History() {
   }, []);
 
   const handleSignOut = () => {
-    localStorage.removeItem('access_token');
+    localStorage.removeItem('patient_access_token');
     navigate('/patient');
   };
 
@@ -153,14 +166,17 @@ export default function History() {
                   <div className="text-sm font-semibold text-ink">{v.checkInTime}</div>
                 </div>
                 <div className="rounded-xl bg-surface p-2">
+                  <div className="text-[10px] font-semibold uppercase tracking-widest text-muted-foreground">Called</div>
+                  <div className="text-sm font-semibold text-ink">{v.calledTime}</div>
+                </div>
+                <div className="rounded-xl bg-surface p-2">
                   <div className="text-[10px] font-semibold uppercase tracking-widest text-muted-foreground">Wait</div>
                   <div className="text-sm font-semibold text-ink">{v.wait}</div>
                 </div>
-                <div className="rounded-xl bg-surface p-2">
-                  <div className="text-[10px] font-semibold uppercase tracking-widest text-muted-foreground">With doctor</div>
-                  <div className="text-sm font-semibold text-ink">{v.consultTime}</div>
-                </div>
               </dl>
+              <div className="mt-3 text-xs text-muted-foreground">
+                <span className="font-semibold">Triaged by:</span> {v.triagedBy}
+              </div>
             </article>
           ))}
         </div>

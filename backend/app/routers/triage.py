@@ -33,7 +33,7 @@ def submit_triage(
     # Update session
     db_session.track_type = triage_data.track_type
     db_session.priority_score = calculate_initial_priority(triage_data.track_type, triage_data.priority_score)
-    db_session.status = models.StatusEnum.TRIAGED.value
+    db_session.status = models.StatusEnum.WAITING.value
     db_session.triaged_by_staff_id = current_staff.id
     
     # Log event

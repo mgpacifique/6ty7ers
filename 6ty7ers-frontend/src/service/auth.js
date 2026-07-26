@@ -28,11 +28,14 @@ export const getTokenPayload = (token) => {
 };
 
 export const clearAuthData = () => {
-  localStorage.removeItem('access_token');
+  localStorage.removeItem('patient_access_token');
+  localStorage.removeItem('staff_access_token');
   localStorage.removeItem('staff');
 };
 
 export const isAuthenticated = () => {
-  const token = localStorage.getItem('access_token');
+  const patientToken = localStorage.getItem('patient_access_token');
+  const staffToken = localStorage.getItem('staff_access_token');
+  const token = patientToken || staffToken;
   return token && !isTokenExpired(token);
 };

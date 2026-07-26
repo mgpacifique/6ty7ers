@@ -41,8 +41,13 @@ def verify_otp(data: schemas.PatientOTPVerify, db: Session = Depends(get_db)):
     
     if not patient.otp_code or patient.otp_code != data.otp_code:
         raise HTTPException(status_code=401, detail="Invalid OTP code")
-        
-    if not patient.otp_expires_at or patient.otp_expires_at < datetime.now(timezone.utc):
+
+    # Handle both naive and aware datetimes
+    otp_expires = patient.otp_expires_at
+    if otp_expires and otp_expires.tzinfo is None:
+        otp_expires = otp_expires.replace(tzinfo=timezone.utc)
+
+    if not otp_expires or otp_expires < datetime.now(timezone.utc):
         raise HTTPException(status_code=401, detail="OTP code has expired")
         
     # Clear the OTP once used

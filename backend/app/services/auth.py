@@ -64,19 +64,24 @@ def decode_access_token(token: str) -> dict:
     try:
         header_segment, payload_segment, signature = token.split(".", 2)
     except ValueError as exc:
+        print(f"[AUTH] Token format error: {exc}")
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid token") from exc
 
     expected_signature = _sign(f"{header_segment}.{payload_segment}")
     if not hmac.compare_digest(signature, expected_signature):
+        print(f"[AUTH] Signature mismatch - got {signature[:10]}... expected {expected_signature[:10]}...")
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid token")
 
     try:
         payload = json.loads(_base64url_decode(payload_segment).decode())
     except (ValueError, json.JSONDecodeError) as exc:
+        print(f"[AUTH] Payload decode error: {exc}")
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid token") from exc
 
     expires_at = datetime.fromtimestamp(payload.get("exp", 0), tz=timezone.utc)
-    if expires_at <= datetime.now(timezone.utc):
+    now = datetime.now(timezone.utc)
+    if expires_at <= now:
+        print(f"[AUTH] Token expired - expires: {expires_at}, now: {now}, diff: {(expires_at - now).total_seconds()}s")
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Token expired")
 
     return payload

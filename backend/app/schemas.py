@@ -55,6 +55,18 @@ class PatientInfo(BaseModel):
     class Config:
         from_attributes = True
 
+class PatientQueueResponse(BaseModel):
+    public_token: str
+    full_name: str
+    status: str
+    track_type: Optional[str] = None
+    position_in_queue: int
+    estimated_wait_minutes: int
+    t1_check_in: datetime
+
+    class Config:
+        from_attributes = True
+
 class VisitHistoryResponse(BaseModel):
     id: UUID
     patient_id: UUID

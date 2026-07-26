@@ -2,7 +2,7 @@ import { Navigate } from 'react-router-dom';
 import { isTokenExpired, clearAuthData } from '../service/auth';
 
 export default function ProtectedRoute({ children, requiredRole = null }) {
-  const token = localStorage.getItem('access_token');
+  const token = localStorage.getItem('staff_access_token');
   const staffData = localStorage.getItem('staff');
 
   // If no token, redirect to login

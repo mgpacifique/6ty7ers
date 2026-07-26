@@ -91,7 +91,7 @@ export default function Triage() {
 
   const handleSignOut = () => {
     if (confirm('Are you sure you want to sign out?')) {
-      localStorage.removeItem('access_token');
+      localStorage.removeItem('staff_access_token');
       localStorage.removeItem('staff');
       navigate('/staff/login');
     }

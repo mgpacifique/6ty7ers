@@ -122,7 +122,7 @@ export default function Verify({ phoneNumber, onBack }) {
         otp_code: otp,
       });
 
-      localStorage.setItem('access_token', response.access_token);
+      localStorage.setItem('patient_access_token', response.access_token);
 
       // Fetch patient's active session using the new token
       try {

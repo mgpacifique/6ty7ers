@@ -8,6 +8,17 @@ const getApiBase = () => {
   return 'http://localhost:8000';
 };
 
+const getAuthToken = () => {
+  const isStaffPath = window.location.pathname.startsWith('/staff');
+
+  if (isStaffPath) {
+    return localStorage.getItem('staff_access_token');
+  }
+
+  return localStorage.getItem('patient_access_token') ||
+         localStorage.getItem('staff_access_token');
+};
+
 const API_BASE = getApiBase();
 
 const handleTokenExpiry = () => {
@@ -16,7 +27,7 @@ const handleTokenExpiry = () => {
 };
 
 export async function apiPost(path, body) {
-  const token = localStorage.getItem('access_token');
+  const token = getAuthToken();
 
   if (token && isTokenExpired(token)) {
     handleTokenExpiry();
@@ -46,7 +57,7 @@ export async function apiPost(path, body) {
 }
 
 export async function apiGet(path) {
-  const token = localStorage.getItem('access_token');
+  const token = getAuthToken();
 
   if (token && isTokenExpired(token)) {
     handleTokenExpiry();

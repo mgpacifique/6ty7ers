@@ -1,48 +1,30 @@
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { apiGet } from '../../service/api';
+import { onQueueUpdate, offQueueUpdate, onPatientCalled, offPatientCalled, disconnectSocket } from '../../service/socket';
 
-export default function LiveQueue({ token, department }) {
+export default function LiveQueue() {
   const navigate = useNavigate();
+  const [token, setToken] = useState('');
   const [status, setStatus] = useState('Waiting');
+  const [fullName, setFullName] = useState('');
+  const [trackType, setTrackType] = useState('');
   const [totalWaiting, setTotalWaiting] = useState(0);
-  const [urgentCount, setUrgentCount] = useState(0);
+  const [estimatedWait, setEstimatedWait] = useState(0);
   const [lastUpdated, setLastUpdated] = useState('just now');
 
   useEffect(() => {
     const updateQueueStatus = async () => {
       try {
-        const data = await apiGet('/queue/');
+        const data = await apiGet('/queue/patient');
 
-        // Find current patient in queue
-        const patientInQueue = data.find(p => p.public_token === token);
-
-        // Update patient status
-        if (patientInQueue) {
-          if (patientInQueue.status === 'CALLED') {
-            setStatus('Called');
-          } else if (patientInQueue.status === 'TRIAGED') {
-            setStatus('Triaged');
-          } else {
-            setStatus('Waiting');
-          }
-        }
-
-        // Count patients ahead (higher dynamic priority)
-        let positionAhead = 0;
-        if (patientInQueue) {
-          positionAhead = data.filter(
-            p => p.status !== 'COMPLETED' &&
-                 p.dynamic_priority > patientInQueue.dynamic_priority
-          ).length;
-        }
-        setTotalWaiting(Math.max(0, positionAhead));
-
-        // Count urgent patients in queue
-        const urgentPatients = data.filter(
-          p => p.track_type === 'Urgent' && p.status !== 'COMPLETED'
-        ).length;
-        setUrgentCount(urgentPatients);
+        // Update patient info from response
+        setToken(data.public_token);
+        setStatus(data.status);
+        setFullName(data.full_name);
+        setTrackType(data.track_type);
+        setTotalWaiting(Math.max(0, data.position_in_queue - 1));
+        setEstimatedWait(data.estimated_wait_minutes);
 
         const now = new Date();
         setLastUpdated(now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }));
@@ -51,13 +33,31 @@ export default function LiveQueue({ token, department }) {
       }
     };
 
+    // Initial load
     updateQueueStatus();
-    const interval = setInterval(updateQueueStatus, 15000);
-    return () => clearInterval(interval);
-  }, [token]);
+
+    // Set up WebSocket listeners for real-time updates
+    const handleQueueUpdate = () => {
+      updateQueueStatus();
+    };
+
+    const handlePatientCalled = () => {
+      setStatus('Called');
+      updateQueueStatus();
+    };
+
+    onQueueUpdate(handleQueueUpdate);
+    onPatientCalled(handlePatientCalled);
+
+    return () => {
+      offQueueUpdate(handleQueueUpdate);
+      offPatientCalled(handlePatientCalled);
+      disconnectSocket();
+    };
+  }, []);
 
   const handleSignOut = () => {
-    localStorage.removeItem('access_token');
+    localStorage.removeItem('patient_access_token');
     navigate('/patient');
   };
 
@@ -96,7 +96,14 @@ export default function LiveQueue({ token, department }) {
           <div className="mt-4 flex items-baseline justify-between gap-4">
             <div>
               <div className="font-display text-6xl leading-none text-ink sm:text-7xl">{token}</div>
-              <div className="mt-2 text-sm text-muted-foreground">{department}</div>
+              <div className="mt-2 flex items-center gap-2 text-sm">
+                <span className="text-muted-foreground">{fullName}</span>
+                {trackType && (
+                  <span className="rounded-full bg-primary/10 px-2 py-0.5 text-[10px] font-semibold text-primary">
+                    {trackType}
+                  </span>
+                )}
+              </div>
             </div>
             <div className="rounded-2xl border border-primary/30 bg-card px-4 py-3">
               <div className="text-[10px] font-semibold uppercase tracking-widest text-muted-foreground">Status</div>
@@ -121,13 +128,13 @@ export default function LiveQueue({ token, department }) {
               <div className="mt-1 text-xs text-muted-foreground">Patients ahead</div>
             </div>
 
-            {/* Urgent Track */}
-            <div className="rounded-2xl border border-urgent/30 bg-urgent/5 p-4">
-              <div className="text-[11px] font-semibold uppercase tracking-widest text-urgent">
-                Urgent Track
+            {/* Estimated Wait */}
+            <div className="rounded-2xl border border-border bg-background p-4">
+              <div className="text-[11px] font-semibold uppercase tracking-widest text-muted-foreground">
+                Est. Wait
               </div>
-              <div className="font-display mt-2 text-4xl text-urgent">{urgentCount}</div>
-              <div className="mt-1 text-xs text-muted-foreground">Priority patients</div>
+              <div className="font-display mt-2 text-4xl text-ink">{estimatedWait}</div>
+              <div className="mt-1 text-xs text-muted-foreground">Minutes</div>
             </div>
           </div>
         </section>

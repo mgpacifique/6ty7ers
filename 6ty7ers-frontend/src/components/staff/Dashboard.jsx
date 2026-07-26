@@ -70,7 +70,7 @@ export default function Dashboard() {
 
   const handleLogout = () => {
     if (confirm('Are you sure you want to sign out?')) {
-      localStorage.removeItem('access_token');
+      localStorage.removeItem('staff_access_token');
       localStorage.removeItem('staff');
       navigate('/staff');
     }
@@ -315,8 +315,8 @@ export default function Dashboard() {
             <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
               <div className="rounded-2xl border border-border bg-card p-4">
                 <div className="flex items-center gap-2 text-[11px] font-semibold uppercase tracking-widest text-muted-foreground">
-                  <svg className="h-3.5 w-3.5 text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M17 20h5v-2a3 3 0 00-5.856-1.487M15 10h.01M15 6h.01M9 20H4a2 2 0 01-2-2v-1m6-4h.01M9 10h.01M21 20a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                  <svg className="h-3.5 w-3.5 text-primary" fill="currentColor" viewBox="0 0 24 24">
+                    <path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/>
                   </svg>
                   Waiting
                 </div>
@@ -418,8 +418,8 @@ export default function Dashboard() {
                                   onClick={() => handleCallPatient(patient.id, patient.public_token)}
                                   className="inline-flex items-center gap-1 rounded-full bg-primary px-3 py-1 text-xs font-semibold text-primary-foreground hover:opacity-90"
                                 >
-                                  <svg className="h-3 w-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M3 5a2 2 0 012-2h3.28a1 1 0 00.948.684l1.498 4.493a1 1 0 00.502.756l2.048 1.024a1 1 0 00.956-.004l2.048-1.024a1 1 0 00.502-.756l1.498-4.493a1 1 0 00-.948-.684H17a2 2 0 012 2m-6 12a1 1 0 100-2 1 1 0 000 2zm0 0a1 1 0 100-2 1 1 0 000 2z"></path>
+                                  <svg className="h-3 w-3" fill="currentColor" viewBox="0 0 24 24">
+                                    <path d="M6.62 10.79c1.44 2.83 3.76 5.14 6.59 6.59l2.2-2.2c.27-.27.67-.36 1.02-.24 1.12.37 2.33.57 3.57.57.55 0 1 .45 1 1V20c0 .55-.45 1-1 1-9.39 0-17-7.61-17-17 0-.55.45-1 1-1h3.5c.55 0 1 .45 1 1 0 1.25.2 2.45.57 3.57.11.35.03.74-.25 1.02l-2.2 2.2z"></path>
                                   </svg>
                                   Call
                                 </button>
@@ -468,8 +468,8 @@ export default function Dashboard() {
                             onClick={() => handleCallPatient(patient.id, patient.public_token)}
                             className="mt-3 flex w-full items-center justify-center gap-1.5 rounded-xl bg-urgent py-2 text-xs font-semibold text-urgent-foreground hover:opacity-90"
                           >
-                            <svg className="h-3 w-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M3 5a2 2 0 012-2h3.28a1 1 0 00.948.684l1.498 4.493a1 1 0 00.502.756l2.048 1.024a1 1 0 00.956-.004l2.048-1.024a1 1 0 00.502-.756l1.498-4.493a1 1 0 00-.948-.684H17a2 2 0 012 2m-6 12a1 1 0 100-2 1 1 0 000 2zm0 0a1 1 0 100-2 1 1 0 000 2z"></path>
+                            <svg className="h-3 w-3" fill="currentColor" viewBox="0 0 24 24">
+                              <path d="M6.62 10.79c1.44 2.83 3.76 5.14 6.59 6.59l2.2-2.2c.27-.27.67-.36 1.02-.24 1.12.37 2.33.57 3.57.57.55 0 1 .45 1 1V20c0 .55-.45 1-1 1-9.39 0-17-7.61-17-17 0-.55.45-1 1-1h3.5c.55 0 1 .45 1 1 0 1.25.2 2.45.57 3.57.11.35.03.74-.25 1.02l-2.2 2.2z"></path>
                             </svg>
                             Call now
                           </button>
@@ -539,8 +539,8 @@ export default function Dashboard() {
                                   onClick={() => handleCallPatient(patient.id, patient.public_token)}
                                   className="inline-flex items-center gap-1 rounded-full bg-primary px-3 py-1 text-xs font-semibold text-primary-foreground hover:opacity-90"
                                 >
-                                  <svg className="h-3 w-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M3 5a2 2 0 012-2h3.28a1 1 0 00.948.684l1.498 4.493a1 1 0 00.502.756l2.048 1.024a1 1 0 00.956-.004l2.048-1.024a1 1 0 00.502-.756l1.498-4.493a1 1 0 00-.948-.684H17a2 2 0 012 2m-6 12a1 1 0 100-2 1 1 0 000 2zm0 0a1 1 0 100-2 1 1 0 000 2z"></path>
+                                  <svg className="h-3 w-3" fill="currentColor" viewBox="0 0 24 24">
+                                    <path d="M6.62 10.79c1.44 2.83 3.76 5.14 6.59 6.59l2.2-2.2c.27-.27.67-.36 1.02-.24 1.12.37 2.33.57 3.57.57.55 0 1 .45 1 1V20c0 .55-.45 1-1 1-9.39 0-17-7.61-17-17 0-.55.45-1 1-1h3.5c.55 0 1 .45 1 1 0 1.25.2 2.45.57 3.57.11.35.03.74-.25 1.02l-2.2 2.2z"></path>
                                   </svg>
                                   Call
                                 </button>

@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 
-export default function Login() {
+export default function Login({ onLoginSuccess }) {
   const navigate = useNavigate();
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
@@ -30,12 +30,8 @@ export default function Login() {
         return 'http://localhost:8000';
       };
       const API_BASE = getApiBase();
-      const token = localStorage.getItem('access_token');
       const res = await fetch(`${API_BASE}/auth/login`, {
         method: 'POST',
-        headers: {
-          ...(token && { Authorization: `Bearer ${token}` }),
-        },
         body: formData,
       });
 
@@ -50,14 +46,14 @@ export default function Login() {
 
       const response = await res.json();
 
-      localStorage.setItem('access_token', response.access_token);
+      localStorage.setItem('staff_access_token', response.access_token);
       localStorage.setItem('staff', JSON.stringify(response.staff));
 
-      if (window.onLoginSuccess) {
-        window.onLoginSuccess(response.staff);
+      if (onLoginSuccess) {
+        onLoginSuccess(response.staff);
+      } else {
+        navigate('/staff/dashboard');
       }
-
-      navigate('/staff/dashboard');
     } catch (err) {
       setError(err.message || 'Login failed. Please check your credentials.');
     } finally {
