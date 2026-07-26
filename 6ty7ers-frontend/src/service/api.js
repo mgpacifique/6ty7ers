@@ -22,17 +22,13 @@ const getAuthToken = () => {
 const API_BASE = getApiBase();
 
 const handleTokenExpiry = () => {
+  const isPatientPath = window.location.pathname.startsWith('/patient');
   clearAuthData();
-  window.location.href = '/staff';
+  window.location.href = isPatientPath ? '/patient' : '/staff';
 };
 
 export async function apiPost(path, body) {
   const token = getAuthToken();
-
-  if (token && isTokenExpired(token)) {
-    handleTokenExpiry();
-    throw new Error('Session expired. Please log in again.');
-  }
 
   const res = await fetch(`${API_BASE}${path}`, {
     method: "POST",
@@ -59,11 +55,6 @@ export async function apiPost(path, body) {
 export async function apiGet(path) {
   const token = getAuthToken();
 
-  if (token && isTokenExpired(token)) {
-    handleTokenExpiry();
-    throw new Error('Session expired. Please log in again.');
-  }
-
   const res = await fetch(`${API_BASE}${path}`, {
     method: "GET",
     headers: {
@@ -87,11 +78,6 @@ export async function apiGet(path) {
 
 export async function apiPut(path, body) {
   const token = getAuthToken();
-
-  if (token && isTokenExpired(token)) {
-    handleTokenExpiry();
-    throw new Error('Session expired. Please log in again.');
-  }
 
   const res = await fetch(`${API_BASE}${path}`, {
     method: "PUT",
@@ -117,11 +103,6 @@ export async function apiPut(path, body) {
 
 export async function apiDelete(path) {
   const token = getAuthToken();
-
-  if (token && isTokenExpired(token)) {
-    handleTokenExpiry();
-    throw new Error('Session expired. Please log in again.');
-  }
 
   const res = await fetch(`${API_BASE}${path}`, {
     method: "DELETE",
