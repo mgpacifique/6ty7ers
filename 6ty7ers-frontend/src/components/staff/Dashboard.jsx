@@ -86,6 +86,19 @@ export default function Dashboard() {
     }
   };
 
+  const handleRefresh = async () => {
+    try {
+      setLoading(true);
+      const response = await apiGet('/queue/');
+      setQueueData(response || []);
+      setError('');
+    } catch (err) {
+      setError(err.message || 'Failed to refresh queue');
+    } finally {
+      setLoading(false);
+    }
+  };
+
   const isActive = (path) => location.pathname === path;
 
   if (loading) return <div className="min-h-screen flex items-center justify-center">Loading...</div>;
@@ -102,7 +115,7 @@ export default function Dashboard() {
             <div>
               <div className="font-display text-xl leading-none text-ink">CareQueue</div>
               <div className="text-[10px] font-semibold uppercase tracking-widest text-muted-foreground">
-                Staff Console
+                Staff
               </div>
             </div>
           </div>
@@ -176,12 +189,9 @@ export default function Dashboard() {
           </nav>
 
           <div className="border-t border-border p-4">
-            <div className="text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">Shift</div>
-            <div className="mt-1 text-sm font-semibold text-ink">7:00 AM – 3:00 PM</div>
-            <div className="text-xs text-muted-foreground">General Medicine</div>
             <button
               onClick={handleLogout}
-              className="mt-4 flex w-full items-center justify-center gap-2 rounded-xl border border-border bg-card py-2 text-xs font-semibold text-ink hover:bg-secondary"
+              className="flex w-full items-center justify-center gap-2 rounded-xl border border-border bg-card py-2 text-xs font-semibold text-ink hover:bg-secondary"
             >
               <svg className="h-3.5 w-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"></path>
@@ -197,7 +207,7 @@ export default function Dashboard() {
           <header className="sticky top-0 z-10 flex items-center gap-3 border-b border-border bg-background/80 px-4 py-3 backdrop-blur sm:px-6 lg:px-8">
             <div className="min-w-0 flex-1">
               <h1 className="font-display truncate text-2xl leading-tight text-ink sm:text-3xl">Live Queue</h1>
-              <p className="truncate text-xs text-muted-foreground sm:text-sm">Borcelle Hospital · General Medicine · Today</p>
+              <p className="truncate text-xs text-muted-foreground sm:text-sm">All active sessions</p>
             </div>
 
             <div className="hidden items-center gap-2 rounded-full border border-border bg-card px-3 py-1.5 md:flex">
@@ -212,17 +222,11 @@ export default function Dashboard() {
               />
             </div>
 
-            <div className="flex items-center gap-1 rounded-full px-2.5 py-1 text-[11px] font-semibold bg-primary/10 text-primary">
+            <button onClick={handleRefresh} className="flex items-center gap-1 rounded-full px-2.5 py-1 text-[11px] font-semibold border border-border bg-card text-ink hover:bg-secondary transition" disabled={loading}>
               <svg className="h-3 w-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M8.111 16.251a.75.75 0 00.582.25H15m-4.5 0a.75.75 0 01-.582-.25H4.5m0 0l-.621 9.026A2.25 2.25 0 006.121 21h11.758a2.25 2.25 0 002.241-1.973l.621-9.026m-16.5 0h16.5m-1.5-6.75a6 6 0 11-12 0 6 6 0 0112 0z"></path>
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path>
               </svg>
-              Live
-            </div>
-
-            <button className="rounded-full border border-border bg-card p-2 text-muted-foreground hover:text-ink">
-              <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"></path>
-              </svg>
+              Refresh
             </button>
 
             <div className="hidden items-center gap-2 rounded-full border border-border bg-card px-3 py-1.5 sm:flex">
@@ -339,7 +343,7 @@ export default function Dashboard() {
                   Routine
                 </div>
                 <div className="font-display mt-2 text-3xl text-ink">{routinePatients.length}</div>
-                <div className="text-[11px] text-muted-foreground">FIFO track</div>
+                <div className="text-[11px] text-muted-foreground">Standard</div>
               </div>
 
               <div className="rounded-2xl border border-urgent/40 bg-urgent/5 p-4">
@@ -350,7 +354,7 @@ export default function Dashboard() {
                   Urgent now
                 </div>
                 <div className="font-display mt-2 text-3xl text-urgent">{urgentPatients.length}</div>
-                <div className="text-[11px] text-muted-foreground">Priority track</div>
+                <div className="text-[11px] text-muted-foreground">Emergency</div>
               </div>
             </div>
 
@@ -368,7 +372,7 @@ export default function Dashboard() {
                 <div className="flex items-baseline justify-between">
                   <div>
                     <h2 className="font-display text-xl text-ink">Routine track</h2>
-                    <p className="text-xs text-muted-foreground">FIFO + starvation protected</p>
+
                   </div>
                   <span className="text-xs font-semibold text-muted-foreground">{routinePatients.length} in line</span>
                 </div>
@@ -441,9 +445,7 @@ export default function Dashboard() {
                   </span>
                   <h2 className="font-display text-xl text-ink">Urgent track</h2>
                 </div>
-                <p className="text-xs text-muted-foreground">
-                  Inserted ahead of routine queue automatically by the Smart Logic Engine.
-                </p>
+
 
                 <div className="mt-4 space-y-3">
                   {urgentPatients.length > 0 ? (

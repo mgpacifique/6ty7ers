@@ -5,13 +5,8 @@ export default function Login() {
   const navigate = useNavigate();
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
-  const [selectedRole, setSelectedRole] = useState('Doctor');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
-
-  const handleRoleSelect = (role) => {
-    setSelectedRole(role);
-  };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -73,7 +68,7 @@ export default function Login() {
   return (
     <div className="grid min-h-screen grid-cols-1 lg:grid-cols-[1.1fr_1fr]">
       {/* Left Sidebar (Hidden on mobile) */}
-      <div className="grain-bg relative hidden flex-col justify-between border-r border-border bg-surface p-10 lg:flex">
+      <div className="grain-bg relative hidden flex-col justify-center border-r border-border bg-surface p-10 lg:flex">
         {/* Logo */}
         <div className="flex items-center gap-2">
           <svg className="h-5 w-5 text-primary" fill="currentColor" viewBox="0 0 24 24">
@@ -100,7 +95,6 @@ export default function Login() {
         </div>
 
         {/* Footer */}
-        <div className="text-[11px] uppercase tracking-widest text-muted-foreground">v2.4 · Staff Console</div>
       </div>
 
       {/* Right Login Panel */}
@@ -163,40 +157,6 @@ export default function Login() {
               </div>
             </label>
 
-            {/* Role Selection */}
-            <div>
-              <div className="mb-2 text-[11px] font-semibold uppercase tracking-widest text-muted-foreground">
-                Role
-              </div>
-              <div className="grid grid-cols-2 gap-2">
-                <button
-                  type="button"
-                  onClick={() => handleRoleSelect('Doctor')}
-                  className={`rounded-xl border px-3 py-2 text-sm font-semibold transition ${
-                    selectedRole === 'Doctor'
-                      ? 'border-primary bg-primary/10 text-primary'
-                      : 'border-border text-muted-foreground hover:text-ink'
-                  }`}
-                >
-                  Doctor
-                </button>
-                <button
-                  type="button"
-                  onClick={() => handleRoleSelect('Admin')}
-                  className={`rounded-xl border px-3 py-2 text-sm font-semibold transition ${
-                    selectedRole === 'Admin'
-                      ? 'border-primary bg-primary/10 text-primary'
-                      : 'border-border text-muted-foreground hover:text-ink'
-                  }`}
-                >
-                  Admin
-                </button>
-              </div>
-              <p className="mt-1 text-[10px] text-muted-foreground">
-                Role is granted by the backend on login.
-              </p>
-            </div>
-
             {/* Error Message */}
             {error && (
               <div className="rounded-xl border border-destructive/30 bg-destructive/10 px-3 py-2 text-xs font-medium text-destructive">
@@ -217,13 +177,6 @@ export default function Login() {
             </button>
           </form>
 
-          {/* Demo Accounts */}
-          <div className="mt-6 rounded-xl border border-dashed border-border bg-surface p-3 text-[11px] text-muted-foreground">
-            <div className="font-semibold text-ink">Demo accounts</div>
-            <div>admin_amina / admin123</div>
-            <div>nurse_grace / nurse123</div>
-            <div>doctor_jean / doctor123</div>
-          </div>
         </div>
       </div>
     </div>

@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { apiGet } from '../service/api';
+import { onQueueUpdate, offQueueUpdate, disconnectSocket } from '../service/socket';
 
 export default function TvDisplay() {
   const [currentTime, setCurrentTime] = useState('12:34');
@@ -25,54 +26,71 @@ export default function TvDisplay() {
     return () => clearInterval(timeInterval);
   }, []);
 
-  useEffect(() => {
-    const updateQueueDisplay = async () => {
-      try {
-        const data = await apiGet('/queue/');
+  const updateQueueDisplay = async () => {
+    try {
+      const data = await apiGet('/queue/');
 
-        // Work with flat list
-        const allPatients = data || [];
+      // Work with flat list
+      const allPatients = data || [];
+      console.log('Queue data:', allPatients.map(p => ({ token: p.public_token, status: p.status })));
 
-        // Separate by track type
-        const routine = allPatients.filter(p => p.track_type === 'Routine');
-        const urgent = allPatients.filter(p => p.track_type === 'Urgent');
+      // Separate by track type
+      const routine = allPatients.filter(p => p.track_type === 'Routine');
+      const urgent = allPatients.filter(p => p.track_type === 'Urgent');
 
-        // Find currently served patient (CALLED status)
-        const called = allPatients.filter(p => p.status === 'CALLED');
-        const nowServingPatient = called[0];
-        if (nowServingPatient) {
-          setNowServing(nowServingPatient.public_token);
-        }
-
-        // Find urgent patient being served
-        const urgentCalled = urgent.filter(p => p.status === 'CALLED');
-        setShowUrgent(urgentCalled.length > 0);
-        if (urgentCalled.length > 0) {
-          setUrgentToken(urgentCalled[0].public_token);
-        }
-
-        // Get next in line (waiting patients)
-        const waiting = allPatients.filter(p =>
-          p.status === 'WAITING' || p.status === 'TRIAGED'
-        ).slice(0, 6);
-
-        setUpNextList(
-          waiting.map(p => ({
-            token: p.public_token,
-            dept: 'General Medicine',
-          }))
-        );
-
-        setIsLive(true);
-      } catch (err) {
-        console.error('Failed to load queue data:', err);
-        setIsLive(false);
+      // Find currently served patient (Called status)
+      const called = allPatients.filter(p => p.status === 'Called');
+      console.log('Called patients:', called.map(p => p.public_token));
+      const nowServingPatient = called[0];
+      if (nowServingPatient) {
+        setNowServing(nowServingPatient.public_token);
       }
+
+      // Find urgent patient being served
+      const urgentCalled = urgent.filter(p => p.status === 'Called');
+      setShowUrgent(urgentCalled.length > 0);
+      if (urgentCalled.length > 0) {
+        setUrgentToken(urgentCalled[0].public_token);
+      }
+
+      // Get next in line (waiting patients)
+      const waiting = allPatients.filter(p =>
+        p.status === 'Waiting' || p.status === 'Triaged'
+      ).slice(0, 6);
+
+      setUpNextList(
+        waiting.map(p => ({
+          token: p.public_token,
+          dept: 'General Medicine',
+        }))
+      );
+
+      setIsLive(true);
+    } catch (err) {
+      console.error('Failed to load queue data:', err);
+      setIsLive(false);
+    }
+  };
+
+  useEffect(() => {
+    // Initial load
+    updateQueueDisplay();
+
+    // WebSocket listener for real-time updates
+    const handleQueueUpdate = () => {
+      updateQueueDisplay();
     };
 
-    updateQueueDisplay();
-    const queueInterval = setInterval(updateQueueDisplay, 15000);
-    return () => clearInterval(queueInterval);
+    onQueueUpdate(handleQueueUpdate);
+
+    // Fallback polling every 30 seconds
+    const queueInterval = setInterval(updateQueueDisplay, 30000);
+
+    return () => {
+      clearInterval(queueInterval);
+      offQueueUpdate(handleQueueUpdate);
+      disconnectSocket();
+    };
   }, []);
 
   return (

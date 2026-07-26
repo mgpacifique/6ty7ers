@@ -74,7 +74,7 @@ export default function CheckIn() {
             <div>
               <div className="font-display text-xl leading-none text-ink">CareQueue</div>
               <div className="text-[10px] font-semibold uppercase tracking-widest text-muted-foreground">
-                Staff Console
+                Staff
               </div>
             </div>
           </div>
@@ -148,12 +148,9 @@ export default function CheckIn() {
           </nav>
 
           <div className="border-t border-border p-4">
-            <div className="text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">Shift</div>
-            <div className="mt-1 text-sm font-semibold text-ink">7:00 AM – 3:00 PM</div>
-            <div className="text-xs text-muted-foreground">General Medicine</div>
             <button
               onClick={handleLogout}
-              className="mt-4 flex w-full items-center justify-center gap-2 rounded-xl border border-border bg-card py-2 text-xs font-semibold text-ink hover:bg-secondary"
+              className="flex w-full items-center justify-center gap-2 rounded-xl border border-border bg-card py-2 text-xs font-semibold text-ink hover:bg-secondary"
             >
               <svg className="h-3.5 w-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"></path>
@@ -171,29 +168,6 @@ export default function CheckIn() {
               <h1 className="font-display truncate text-2xl leading-tight text-ink sm:text-3xl">Check-In Patient</h1>
               <p className="truncate text-xs text-muted-foreground sm:text-sm">Register a walk-in and issue a queue token</p>
             </div>
-
-            <div className="hidden items-center gap-2 rounded-full border border-border bg-card px-3 py-1.5 md:flex">
-              <svg className="h-3.5 w-3.5 text-muted-foreground" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
-              </svg>
-              <input
-                placeholder="Search token, patient, doctor..."
-                className="w-56 bg-transparent text-sm outline-none placeholder:text-muted-foreground"
-              />
-            </div>
-
-            <div className="flex items-center gap-1 rounded-full px-2.5 py-1 text-[11px] font-semibold bg-primary/10 text-primary">
-              <svg className="h-3 w-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M8.111 16.251a.75.75 0 00.582.25H15m-4.5 0a.75.75 0 01-.582-.25H4.5m0 0l-.621 9.026A2.25 2.25 0 006.121 21h11.758a2.25 2.25 0 002.241-1.973l.621-9.026m-16.5 0h16.5m-1.5-6.75a6 6 0 11-12 0 6 6 0 0112 0z"></path>
-              </svg>
-              Live
-            </div>
-
-            <button className="rounded-full border border-border bg-card p-2 text-muted-foreground hover:text-ink">
-              <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"></path>
-              </svg>
-            </button>
 
             <div className="hidden items-center gap-2 rounded-full border border-border bg-card px-3 py-1.5 sm:flex">
               <div className="grid h-6 w-6 place-items-center rounded-full bg-primary text-[10px] font-bold text-primary-foreground">
@@ -289,7 +263,7 @@ export default function CheckIn() {
                   <div>
                     <div className="font-display text-2xl text-ink">New patient</div>
                     <div className="text-xs text-muted-foreground">
-                      Details are only used for this visit.
+                      Add a New Patient.
                     </div>
                   </div>
                 </div>
@@ -314,7 +288,7 @@ export default function CheckIn() {
                     </div>
                   </label>
 
-                  {/* Department Field */}
+                  {/* Department Field
                   <label className="block">
                     <div className="mb-1 text-[11px] font-semibold uppercase tracking-widest text-muted-foreground">
                       Department
@@ -333,7 +307,7 @@ export default function CheckIn() {
                     <div className="mt-1 text-[10px] text-muted-foreground italic">
                       to be continued...
                     </div>
-                  </label>
+                  </label> */}
 
                   {/* Phone Number Field */}
                   <label className="block">

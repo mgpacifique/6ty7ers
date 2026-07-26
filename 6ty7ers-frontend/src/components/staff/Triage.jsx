@@ -24,8 +24,8 @@ export default function Triage() {
         setPageLoading(true);
         const response = await apiGet('/queue/');
 
-        // Filter patients that haven't been triaged yet (status is REGISTERED)
-        const awaitingTriage = response.filter(p => p.status === 'REGISTERED');
+        // Filter patients that haven't been triaged yet (status is Registered)
+        const awaitingTriage = response.filter(p => p.status === 'Registered');
 
         setAwaitingPatients(awaitingTriage);
 
@@ -126,18 +126,18 @@ export default function Triage() {
             </svg>
             <div>
               <div className="font-display text-xl leading-none text-ink">CareQueue</div>
-              <div className="text-[10px] font-semibold uppercase tracking-widest text-muted-foreground">Staff Console</div>
+              <div className="text-[10px] font-semibold uppercase tracking-widest text-muted-foreground">Staff</div>
             </div>
           </div>
 
           <nav className="mt-2 flex flex-1 flex-col gap-1 px-3">
-            <a href="/staff" className={`flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium transition ${isActive('/staff') ? 'bg-primary text-primary-foreground shadow-sm' : 'text-muted-foreground hover:bg-secondary hover:text-ink'}`}>
+            <a href="/staff/dashboard" className={`flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium transition ${isActive('/staff/dashboard') ? 'bg-primary text-primary-foreground shadow-sm' : 'text-muted-foreground hover:bg-secondary hover:text-ink'}`}>
               <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 6a2 2 0 012-2h12a2 2 0 012 2v12a2 2 0 01-2 2H6a2 2 0 01-2-2V6z"></path>
               </svg>
               Queue
             </a>
-            <a href="/staff/checkin" className={`flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium transition ${isActive('/staff/checkin') ? 'bg-primary text-primary-foreground shadow-sm' : 'text-muted-foreground hover:bg-secondary hover:text-ink'}`}>
+            <a href="/staff/check-in" className={`flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium transition ${isActive('/staff/check-in') ? 'bg-primary text-primary-foreground shadow-sm' : 'text-muted-foreground hover:bg-secondary hover:text-ink'}`}>
               <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M18 9v3m0 0v3m0-3h3m-3 0h-3m-2-5a4 4 0 11-8 0 4 4 0 018 0zM3 20a6 6 0 0112 0v1H3v-1z"></path>
               </svg>
@@ -164,12 +164,9 @@ export default function Triage() {
           </nav>
 
           <div className="border-t border-border p-4">
-            <div className="text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">Shift</div>
-            <div className="mt-1 text-sm font-semibold text-ink">7:00 AM – 3:00 PM</div>
-            <div className="text-xs text-muted-foreground">General Medicine</div>
             <button
               onClick={handleSignOut}
-              className="mt-4 flex w-full items-center justify-center gap-2 rounded-xl border border-border bg-card py-2 text-xs font-semibold text-ink hover:bg-secondary"
+              className="flex w-full items-center justify-center gap-2 rounded-xl border border-border bg-card py-2 text-xs font-semibold text-ink hover:bg-secondary"
             >
               <svg className="h-3.5 w-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"></path>
@@ -188,26 +185,6 @@ export default function Triage() {
               <p className="truncate text-xs text-muted-foreground sm:text-sm">Rate urgency to route the patient</p>
             </div>
 
-            <div className="hidden items-center gap-2 rounded-full border border-border bg-card px-3 py-1.5 md:flex">
-              <svg className="h-3.5 w-3.5 text-muted-foreground" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
-              </svg>
-              <input placeholder="Search token, patient, doctor..." className="w-56 bg-transparent text-sm outline-none placeholder:text-muted-foreground" />
-            </div>
-
-            <div className="flex items-center gap-1 rounded-full px-2.5 py-1 text-[11px] font-semibold bg-primary/10 text-primary">
-              <svg className="h-3 w-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M8.111 16.251a.75.75 0 00.582.25H15m-4.5 0a.75.75 0 01-.582-.25H4.5m0 0l-.621 9.026A2.25 2.25 0 006.121 21h11.758a2.25 2.25 0 002.241-1.973l.621-9.026m-16.5 0h16.5m-1.5-6.75a6 6 0 11-12 0 6 6 0 0112 0z"></path>
-              </svg>
-              Live
-            </div>
-
-            <button className="rounded-full border border-border bg-card p-2 text-muted-foreground hover:text-ink">
-              <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"></path>
-              </svg>
-            </button>
-
             <div className="hidden items-center gap-2 rounded-full border border-border bg-card px-3 py-1.5 sm:flex">
               <div className="grid h-6 w-6 place-items-center rounded-full bg-primary text-[10px] font-bold text-primary-foreground">
                 {initials}
@@ -221,13 +198,13 @@ export default function Triage() {
 
           {/* Mobile Navigation */}
           <nav className="flex items-center gap-1 overflow-x-auto border-b border-border bg-surface px-2 py-2 lg:hidden">
-            <a href="/staff" className={`flex shrink-0 items-center gap-1.5 rounded-full px-3 py-1.5 text-xs font-semibold ${isActive('/staff') ? 'bg-primary text-primary-foreground' : 'text-muted-foreground'}`}>
+            <a href="/staff/dashboard" className={`flex shrink-0 items-center gap-1.5 rounded-full px-3 py-1.5 text-xs font-semibold ${isActive('/staff/dashboard') ? 'bg-primary text-primary-foreground' : 'text-muted-foreground'}`}>
               <svg className="h-3.5 w-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 6a2 2 0 012-2h12a2 2 0 012 2v12a2 2 0 01-2 2H6a2 2 0 01-2-2V6z"></path>
               </svg>
               Queue
             </a>
-            <a href="/staff/checkin" className={`flex shrink-0 items-center gap-1.5 rounded-full px-3 py-1.5 text-xs font-semibold ${isActive('/staff/checkin') ? 'bg-primary text-primary-foreground' : 'text-muted-foreground'}`}>
+            <a href="/staff/check-in" className={`flex shrink-0 items-center gap-1.5 rounded-full px-3 py-1.5 text-xs font-semibold ${isActive('/staff/check-in') ? 'bg-primary text-primary-foreground' : 'text-muted-foreground'}`}>
               <svg className="h-3.5 w-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M18 9v3m0 0v3m0-3h3m-3 0h-3m-2-5a4 4 0 11-8 0 4 4 0 018 0zM3 20a6 6 0 0112 0v1H3v-1z"></path>
               </svg>
@@ -312,7 +289,7 @@ export default function Triage() {
                     </div>
                   </div>
 
-                  <dl className="mt-6 grid grid-cols-2 gap-3 sm:grid-cols-3">
+                  <dl className="mt-6 grid grid-cols-2 gap-3 sm:grid-cols-2">
                     <div className="rounded-xl border border-border bg-background p-3">
                       <div className="text-[10px] font-semibold uppercase tracking-widest text-muted-foreground">Reason</div>
                       <div className="mt-1 text-sm font-semibold text-ink">{patientData.reason}</div>
@@ -321,10 +298,10 @@ export default function Triage() {
                       <div className="text-[10px] font-semibold uppercase tracking-widest text-muted-foreground">Department</div>
                       <div className="mt-1 text-sm font-semibold text-ink">{patientData.department}</div>
                     </div>
-                    <div className="rounded-xl border border-border bg-background p-3">
+                    {/* <div className="rounded-xl border border-border bg-background p-3">
                       <div className="text-[10px] font-semibold uppercase tracking-widest text-muted-foreground">Est. wait</div>
                       <div className="mt-1 text-sm font-semibold text-ink">~28m</div>
-                    </div>
+                    </div> */}
                   </dl>
 
                   <div className="mt-6">
@@ -345,9 +322,9 @@ export default function Triage() {
                           <div className="text-sm font-semibold text-ink">Non-Urgent</div>
                           <div className="text-xs text-muted-foreground">Routine track, normal FIFO</div>
                         </div>
-                        <div className={`text-sm font-semibold ${urgencyLevel === 'Routine' ? 'text-primary' : 'text-urgent'}`}>
+                        {/* <div className={`text-sm font-semibold ${urgencyLevel === 'Routine' ? 'text-primary' : 'text-urgent'}`}>
                           ~28m
-                        </div>
+                        </div> */}
                       </button>
                       <button
                         type="button"
@@ -362,14 +339,14 @@ export default function Triage() {
                           <div className="text-sm font-semibold text-ink">Emergency / High urgency</div>
                           <div className="text-xs text-muted-foreground">Immediate insertion, priority</div>
                         </div>
-                        <div className={`text-sm font-semibold ${urgencyLevel === 'Urgent' ? 'text-primary' : 'text-urgent'}`}>
+                        {/* <div className={`text-sm font-semibold ${urgencyLevel === 'Urgent' ? 'text-primary' : 'text-urgent'}`}>
                           Now
-                        </div>
+                        </div> */}
                       </button>
                     </div>
                   </div>
 
-                  <label className="mt-6 block">
+                  {/* <label className="mt-6 block">
                     <div className="text-[11px] font-semibold uppercase tracking-widest text-muted-foreground">
                       Nurse notes
                     </div>
@@ -380,7 +357,7 @@ export default function Triage() {
                       placeholder="Optional notes…"
                       className="mt-1 w-full rounded-xl border border-border bg-background p-3 text-sm outline-none focus:border-primary"
                     ></textarea>
-                  </label>
+                  </label> */}
 
                   {error && (
                     <div className="mt-4 rounded-xl bg-red-50 p-3 text-sm text-red-600">
@@ -389,9 +366,9 @@ export default function Triage() {
                   )}
 
                   <div className="mt-6 flex flex-wrap items-center justify-between gap-3">
-                    <p className="text-xs text-muted-foreground">
+                    {/* <p className="text-xs text-muted-foreground">
                       Smart Logic Engine · urgent cases inserted ahead of the routine queue automatically.
-                    </p>
+                    </p> */}
                     <button
                       onClick={handleRoute}
                       disabled={loading}
