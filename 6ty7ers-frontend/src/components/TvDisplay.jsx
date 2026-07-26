@@ -5,7 +5,9 @@ import { onQueueUpdate, offQueueUpdate, disconnectSocket } from '../service/sock
 export default function TvDisplay() {
   const [currentTime, setCurrentTime] = useState('12:34');
   const [nowServing, setNowServing] = useState('FT-405');
+  const [nowServingDept, setNowServingDept] = useState('General Medicine');
   const [urgentToken, setUrgentToken] = useState('FT-410');
+  const [urgentDept, setUrgentDept] = useState('General Medicine');
   const [upNextList, setUpNextList] = useState([]);
   const [isLive, setIsLive] = useState(true);
   const [showUrgent, setShowUrgent] = useState(true);
@@ -45,6 +47,7 @@ export default function TvDisplay() {
       const nowServingPatient = called[0];
       if (nowServingPatient) {
         setNowServing(nowServingPatient.public_token);
+        setNowServingDept(nowServingPatient.department_name || 'General Medicine');
       }
 
       // Find urgent patient being served - most recently called
@@ -53,6 +56,7 @@ export default function TvDisplay() {
       setShowUrgent(urgentCalled.length > 0);
       if (urgentCalled.length > 0) {
         setUrgentToken(urgentCalled[0].public_token);
+        setUrgentDept(urgentCalled[0].department_name || 'General Medicine');
       }
 
       // Get next in line (waiting patients)
@@ -63,7 +67,7 @@ export default function TvDisplay() {
       setUpNextList(
         waiting.map(p => ({
           token: p.public_token,
-          dept: 'General Medicine',
+          dept: p.department_name || 'General Medicine',
         }))
       );
 
@@ -129,7 +133,7 @@ export default function TvDisplay() {
             {nowServing}
           </div>
           <div className="mt-4 text-lg text-primary-foreground/70">
-            General Medicine · Room 4
+            {nowServingDept} · Room 4
           </div>
         </section>
 
@@ -146,8 +150,9 @@ export default function TvDisplay() {
                   Urgent track
                 </span>
               </div>
-              <div className="font-display mt-2 text-5xl">
-                <span>{urgentToken}</span> → Room 1
+              <div className="font-display mt-2 text-5xl flex items-center justify-between">
+                <span>{urgentToken}</span>
+                <span className="text-xl opacity-70 tracking-normal">{urgentDept}</span>
               </div>
             </div>
           )}

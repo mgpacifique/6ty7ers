@@ -84,3 +84,62 @@ export async function apiGet(path) {
 
   return res.json();
 }
+
+export async function apiPut(path, body) {
+  const token = getAuthToken();
+
+  if (token && isTokenExpired(token)) {
+    handleTokenExpiry();
+    throw new Error('Session expired. Please log in again.');
+  }
+
+  const res = await fetch(`${API_BASE}${path}`, {
+    method: "PUT",
+    headers: {
+      "Content-Type": "application/json",
+      ...(token && { Authorization: `Bearer ${token}` }),
+    },
+    body: JSON.stringify(body),
+  });
+
+  if (res.status === 401) {
+    handleTokenExpiry();
+    throw new Error('Session expired. Please log in again.');
+  }
+
+  if (!res.ok) {
+    const err = await res.json().catch(() => ({}));
+    throw new Error(err.detail || "Something went wrong");
+  }
+
+  return res.json();
+}
+
+export async function apiDelete(path) {
+  const token = getAuthToken();
+
+  if (token && isTokenExpired(token)) {
+    handleTokenExpiry();
+    throw new Error('Session expired. Please log in again.');
+  }
+
+  const res = await fetch(`${API_BASE}${path}`, {
+    method: "DELETE",
+    headers: {
+      "Content-Type": "application/json",
+      ...(token && { Authorization: `Bearer ${token}` }),
+    },
+  });
+
+  if (res.status === 401) {
+    handleTokenExpiry();
+    throw new Error('Session expired. Please log in again.');
+  }
+
+  if (!res.ok) {
+    const err = await res.json().catch(() => ({}));
+    throw new Error(err.detail || "Something went wrong");
+  }
+
+  return res.json();
+}

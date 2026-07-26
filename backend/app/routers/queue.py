@@ -45,7 +45,8 @@ def get_public_queue(
             priority_score=session.priority_score,
             t1_check_in=session.t1_check_in,
             t2_called=session.t2_called,
-            dynamic_priority=dyn_priority
+            dynamic_priority=dyn_priority,
+            department_name=session.department.name if session.department else "General Medicine"
         )
         response_items.append(item)
 
@@ -165,7 +166,8 @@ def get_queue(
             priority_score=session.priority_score,
             t1_check_in=session.t1_check_in,
             t2_called=session.t2_called,
-            dynamic_priority=dyn_priority
+            dynamic_priority=dyn_priority,
+            department_name=session.department.name if session.department else "General Medicine"
         )
         response_items.append(item)
 

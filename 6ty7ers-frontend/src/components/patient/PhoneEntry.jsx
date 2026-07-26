@@ -18,9 +18,13 @@ export default function PhoneEntry({ onPhoneSubmit }) {
     setError('');
 
     try {
-      await apiPost('/patient-auth/request-otp', {
+      const response = await apiPost('/patient-auth/request-otp', {
         phone_number: phoneNumber,
       });
+
+      if (response && response.dev_otp) {
+        alert(`TESTING MODE (Twilio inactive)\n\nYour OTP is: ${response.dev_otp}`);
+      }
 
       if (onPhoneSubmit) {
         onPhoneSubmit(phoneNumber);

@@ -21,11 +21,13 @@ class QueueSessionResponse(BaseModel):
 class QueueItemResponse(QueueSessionResponse):
     dynamic_priority: int
     t2_called: Optional[datetime] = None
+    department_name: Optional[str] = None
 
 class StaffOut(BaseModel):
     id: UUID
     username: str
     role: str
+    department_id: Optional[UUID] = None
 
     class Config:
         from_attributes = True
@@ -34,6 +36,22 @@ class StaffRegister(BaseModel):
     username: str
     password: str
     role: str
+    department_id: Optional[UUID] = None
+
+class StaffUpdate(BaseModel):
+    username: Optional[str] = None
+    role: Optional[str] = None
+    department_id: Optional[UUID] = None
+
+class DepartmentCreate(BaseModel):
+    name: str
+
+class DepartmentOut(BaseModel):
+    id: UUID
+    name: str
+
+    class Config:
+        from_attributes = True
 
 
 class AuthTokenResponse(BaseModel):
@@ -44,6 +62,8 @@ class AuthTokenResponse(BaseModel):
 class TriageSubmit(BaseModel):
     track_type: str  # "Urgent" or "Routine"
     priority_score: Optional[int] = None # Nurse can override or let system calculate
+    reason: Optional[str] = None
+    department_id: Optional[UUID] = None
 
 class PatientOTPRequest(BaseModel):
     phone_number: str

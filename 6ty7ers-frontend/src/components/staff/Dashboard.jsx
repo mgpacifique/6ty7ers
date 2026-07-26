@@ -86,6 +86,16 @@ export default function Dashboard() {
     }
   };
 
+  const handleCompletePatient = async (sessionId, token) => {
+    try {
+      await apiPost(`/queue/${sessionId}/complete`, {});
+      const response = await apiGet('/queue/');
+      setQueueData(response || []);
+    } catch (err) {
+      setError(`Failed to complete patient ${token}`);
+    }
+  };
+
   const handleRefresh = async () => {
     try {
       setLoading(true);
@@ -210,7 +220,7 @@ export default function Dashboard() {
               <p className="truncate text-xs text-muted-foreground sm:text-sm">All active sessions</p>
             </div>
 
-            <div className="hidden items-center gap-2 rounded-full border border-border bg-card px-3 py-1.5 md:flex">
+            <div className="hidden items-center gap-2 rounded-full border border-border bg-card px-3 py-1.5 lg:flex">
               <svg className="h-3.5 w-3.5 text-muted-foreground" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
               </svg>
@@ -415,15 +425,27 @@ export default function Dashboard() {
                             </td>
                             <td className="py-3">
                               <div className="flex justify-end">
-                                <button
-                                  onClick={() => handleCallPatient(patient.id, patient.public_token)}
-                                  className="inline-flex items-center gap-1 rounded-full bg-primary px-3 py-1 text-xs font-semibold text-primary-foreground hover:opacity-90"
-                                >
-                                  <svg className="h-3 w-3" fill="currentColor" viewBox="0 0 24 24">
-                                    <path d="M6.62 10.79c1.44 2.83 3.76 5.14 6.59 6.59l2.2-2.2c.27-.27.67-.36 1.02-.24 1.12.37 2.33.57 3.57.57.55 0 1 .45 1 1V20c0 .55-.45 1-1 1-9.39 0-17-7.61-17-17 0-.55.45-1 1-1h3.5c.55 0 1 .45 1 1 0 1.25.2 2.45.57 3.57.11.35.03.74-.25 1.02l-2.2 2.2z"></path>
-                                  </svg>
-                                  Call
-                                </button>
+                                {patient.status === 'Called' ? (
+                                  <button
+                                    onClick={(e) => { e.stopPropagation(); handleCompletePatient(patient.id, patient.public_token); }}
+                                    className="inline-flex items-center gap-1 rounded-full bg-accent px-3 py-1 text-xs font-semibold text-accent-foreground hover:opacity-90"
+                                  >
+                                    <svg className="h-3 w-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 13l4 4L19 7"></path>
+                                    </svg>
+                                    Complete
+                                  </button>
+                                ) : (
+                                  <button
+                                    onClick={(e) => { e.stopPropagation(); handleCallPatient(patient.id, patient.public_token); }}
+                                    className="inline-flex items-center gap-1 rounded-full bg-primary px-3 py-1 text-xs font-semibold text-primary-foreground hover:opacity-90"
+                                  >
+                                    <svg className="h-3 w-3" fill="currentColor" viewBox="0 0 24 24">
+                                      <path d="M6.62 10.79c1.44 2.83 3.76 5.14 6.59 6.59l2.2-2.2c.27-.27.67-.36 1.02-.24 1.12.37 2.33.57 3.57.57.55 0 1 .45 1 1V20c0 .55-.45 1-1 1-9.39 0-17-7.61-17-17 0-.55.45-1 1-1h3.5c.55 0 1 .45 1 1 0 1.25.2 2.45.57 3.57.11.35.03.74-.25 1.02l-2.2 2.2z"></path>
+                                    </svg>
+                                    Call
+                                  </button>
+                                )}
                               </div>
                             </td>
                           </tr>
@@ -465,15 +487,27 @@ export default function Dashboard() {
                             </svg>
                             Waiting {waitMins}m · priority {Math.floor(patient.dynamic_priority)}
                           </div>
-                          <button
-                            onClick={() => handleCallPatient(patient.id, patient.public_token)}
-                            className="mt-3 flex w-full items-center justify-center gap-1.5 rounded-xl bg-urgent py-2 text-xs font-semibold text-urgent-foreground hover:opacity-90"
-                          >
-                            <svg className="h-3 w-3" fill="currentColor" viewBox="0 0 24 24">
-                              <path d="M6.62 10.79c1.44 2.83 3.76 5.14 6.59 6.59l2.2-2.2c.27-.27.67-.36 1.02-.24 1.12.37 2.33.57 3.57.57.55 0 1 .45 1 1V20c0 .55-.45 1-1 1-9.39 0-17-7.61-17-17 0-.55.45-1 1-1h3.5c.55 0 1 .45 1 1 0 1.25.2 2.45.57 3.57.11.35.03.74-.25 1.02l-2.2 2.2z"></path>
-                            </svg>
-                            Call now
-                          </button>
+                          {patient.status === 'Called' ? (
+                            <button
+                              onClick={(e) => { e.stopPropagation(); handleCompletePatient(patient.id, patient.public_token); }}
+                              className="mt-3 flex w-full items-center justify-center gap-1.5 rounded-xl bg-accent py-2 text-xs font-semibold text-accent-foreground hover:opacity-90"
+                            >
+                              <svg className="h-3 w-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 13l4 4L19 7"></path>
+                              </svg>
+                              Complete
+                            </button>
+                          ) : (
+                            <button
+                              onClick={(e) => { e.stopPropagation(); handleCallPatient(patient.id, patient.public_token); }}
+                              className="mt-3 flex w-full items-center justify-center gap-1.5 rounded-xl bg-urgent py-2 text-xs font-semibold text-urgent-foreground hover:opacity-90"
+                            >
+                              <svg className="h-3 w-3" fill="currentColor" viewBox="0 0 24 24">
+                                <path d="M6.62 10.79c1.44 2.83 3.76 5.14 6.59 6.59l2.2-2.2c.27-.27.67-.36 1.02-.24 1.12.37 2.33.57 3.57.57.55 0 1 .45 1 1V20c0 .55-.45 1-1 1-9.39 0-17-7.61-17-17 0-.55.45-1 1-1h3.5c.55 0 1 .45 1 1 0 1.25.2 2.45.57 3.57.11.35.03.74-.25 1.02l-2.2 2.2z"></path>
+                              </svg>
+                              Call now
+                            </button>
+                          )}
                         </div>
                       );
                     })
@@ -536,15 +570,27 @@ export default function Dashboard() {
                             </td>
                             <td className="py-3">
                               <div className="flex justify-end">
-                                <button
-                                  onClick={() => handleCallPatient(patient.id, patient.public_token)}
-                                  className="inline-flex items-center gap-1 rounded-full bg-primary px-3 py-1 text-xs font-semibold text-primary-foreground hover:opacity-90"
-                                >
-                                  <svg className="h-3 w-3" fill="currentColor" viewBox="0 0 24 24">
-                                    <path d="M6.62 10.79c1.44 2.83 3.76 5.14 6.59 6.59l2.2-2.2c.27-.27.67-.36 1.02-.24 1.12.37 2.33.57 3.57.57.55 0 1 .45 1 1V20c0 .55-.45 1-1 1-9.39 0-17-7.61-17-17 0-.55.45-1 1-1h3.5c.55 0 1 .45 1 1 0 1.25.2 2.45.57 3.57.11.35.03.74-.25 1.02l-2.2 2.2z"></path>
-                                  </svg>
-                                  Call
-                                </button>
+                                {patient.status === 'Called' ? (
+                                  <button
+                                    onClick={(e) => { e.stopPropagation(); handleCompletePatient(patient.id, patient.public_token); }}
+                                    className="inline-flex items-center gap-1 rounded-full bg-accent px-3 py-1 text-xs font-semibold text-accent-foreground hover:opacity-90"
+                                  >
+                                    <svg className="h-3 w-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 13l4 4L19 7"></path>
+                                    </svg>
+                                    Complete
+                                  </button>
+                                ) : (
+                                  <button
+                                    onClick={(e) => { e.stopPropagation(); handleCallPatient(patient.id, patient.public_token); }}
+                                    className="inline-flex items-center gap-1 rounded-full bg-primary px-3 py-1 text-xs font-semibold text-primary-foreground hover:opacity-90"
+                                  >
+                                    <svg className="h-3 w-3" fill="currentColor" viewBox="0 0 24 24">
+                                      <path d="M6.62 10.79c1.44 2.83 3.76 5.14 6.59 6.59l2.2-2.2c.27-.27.67-.36 1.02-.24 1.12.37 2.33.57 3.57.57.55 0 1 .45 1 1V20c0 .55-.45 1-1 1-9.39 0-17-7.61-17-17 0-.55.45-1 1-1h3.5c.55 0 1 .45 1 1 0 1.25.2 2.45.57 3.57.11.35.03.74-.25 1.02l-2.2 2.2z"></path>
+                                    </svg>
+                                    Call
+                                  </button>
+                                )}
                               </div>
                             </td>
                           </tr>

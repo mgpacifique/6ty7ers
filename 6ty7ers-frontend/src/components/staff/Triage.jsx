@@ -15,6 +15,7 @@ export default function Triage() {
   const [patientData, setPatientData] = useState(null);
   const [awaitingPatients, setAwaitingPatients] = useState([]);
   const [selectedSessionId, setSelectedSessionId] = useState('');
+  const [departments, setDepartments] = useState([]);
 
   const isActive = (path) => location.pathname === path;
 
@@ -22,7 +23,11 @@ export default function Triage() {
     const fetchTriageData = async () => {
       try {
         setPageLoading(true);
-        const response = await apiGet('/queue/');
+        const [response, depts] = await Promise.all([
+            apiGet('/queue/'),
+            apiGet('/departments/')
+        ]);
+        setDepartments(depts);
 
         // Filter patients that haven't been triaged yet (status is Registered)
         const awaitingTriage = response.filter(p => p.status === 'Registered');
@@ -35,7 +40,8 @@ export default function Triage() {
           setPatientData({
             token: firstPatient.public_token,
             checkedInTime: firstPatient.t1_check_in,
-            department: 'General Medicine',
+            reason: '',
+            departmentId: depts.length > 0 ? depts[0].id : '',
           });
         }
       } catch (err) {
@@ -53,7 +59,8 @@ export default function Triage() {
     setPatientData({
       token: patient.public_token,
       checkedInTime: patient.t1_check_in,
-      department: 'General Medicine',
+      reason: '',
+      departmentId: departments.length > 0 ? departments[0].id : '',
     });
     setUrgencyLevel('Routine');
     setNotes('');
@@ -72,6 +79,8 @@ export default function Triage() {
     try {
       await apiPost(`/triage/${selectedSessionId}`, {
         track_type: urgencyLevel,
+        reason: patientData.reason,
+        department_id: patientData.departmentId
       });
 
       const updatedPatients = awaitingPatients.filter(p => p.id !== selectedSessionId);
@@ -278,30 +287,41 @@ export default function Triage() {
                       Checked in {getWaitMins()} mins ago
                     </span>
                   </div>
-
                   <div className="mt-4 flex items-center gap-3">
                     <div className="grid h-14 w-14 shrink-0 place-items-center rounded-2xl bg-primary/10 font-display text-2xl text-primary">
                       {patientData.token.split('-')[1]}
                     </div>
                     <div className="min-w-0">
                       <div className="font-display text-2xl leading-tight text-ink">Token {patientData.token}</div>
-                      <div className="text-sm text-muted-foreground">{patientData.name} · {patientData.department}</div>
+                      <div className="text-sm text-muted-foreground">{patientData.name || 'Patient'}</div>
                     </div>
                   </div>
 
-                  <dl className="mt-6 grid grid-cols-2 gap-3 sm:grid-cols-2">
-                    <div className="rounded-xl border border-border bg-background p-3">
-                      <div className="text-[10px] font-semibold uppercase tracking-widest text-muted-foreground">Reason</div>
-                      <div className="mt-1 text-sm font-semibold text-ink">{patientData.reason}</div>
+                  <dl className="mt-6 grid grid-cols-1 gap-3 sm:grid-cols-2">
+                    <div className="rounded-xl border border-border bg-background p-3 focus-within:border-primary transition">
+                      <label htmlFor="reason" className="text-[10px] font-semibold uppercase tracking-widest text-muted-foreground">Reason</label>
+                      <input 
+                        id="reason"
+                        type="text" 
+                        value={patientData.reason} 
+                        onChange={(e) => setPatientData({...patientData, reason: e.target.value})}
+                        placeholder="e.g. Headache"
+                        className="mt-1 w-full text-sm font-semibold text-ink bg-transparent outline-none placeholder:text-muted-foreground/50"
+                      />
                     </div>
-                    <div className="rounded-xl border border-border bg-background p-3">
-                      <div className="text-[10px] font-semibold uppercase tracking-widest text-muted-foreground">Department</div>
-                      <div className="mt-1 text-sm font-semibold text-ink">{patientData.department}</div>
+                    <div className="rounded-xl border border-border bg-background p-3 focus-within:border-primary transition">
+                      <label htmlFor="department" className="text-[10px] font-semibold uppercase tracking-widest text-muted-foreground">Department</label>
+                      <select 
+                        id="department"
+                        value={patientData.departmentId} 
+                        onChange={(e) => setPatientData({...patientData, departmentId: e.target.value})}
+                        className="mt-1 w-full text-sm font-semibold text-ink bg-transparent outline-none"
+                      >
+                        {departments.map(d => (
+                           <option key={d.id} value={d.id}>{d.name}</option>
+                        ))}
+                      </select>
                     </div>
-                    {/* <div className="rounded-xl border border-border bg-background p-3">
-                      <div className="text-[10px] font-semibold uppercase tracking-widest text-muted-foreground">Est. wait</div>
-                      <div className="mt-1 text-sm font-semibold text-ink">~28m</div>
-                    </div> */}
                   </dl>
 
                   <div className="mt-6">

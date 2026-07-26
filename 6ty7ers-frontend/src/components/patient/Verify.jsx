@@ -58,9 +58,12 @@ export default function Verify({ phoneNumber, onBack }) {
     setError('');
 
     try {
-      await apiPost('/patient-auth/request-otp', {
+      const response = await apiPost('/patient-auth/request-otp', {
         phone_number: phone,
       });
+      if (response && response.dev_otp) {
+        alert(`TESTING MODE (Twilio inactive)\n\nYour OTP is: ${response.dev_otp}`);
+      }
       setShowPhoneStep(false);
       startCountdown();
       focusFirstInput();
@@ -94,9 +97,12 @@ export default function Verify({ phoneNumber, onBack }) {
     setDigits(['', '', '', '', '', '']);
 
     try {
-      await apiPost('/patient-auth/request-otp', {
+      const response = await apiPost('/patient-auth/request-otp', {
         phone_number: phone,
       });
+      if (response && response.dev_otp) {
+        alert(`TESTING MODE (Twilio inactive)\n\nYour OTP is: ${response.dev_otp}`);
+      }
       startCountdown();
       focusFirstInput();
     } catch (err) {

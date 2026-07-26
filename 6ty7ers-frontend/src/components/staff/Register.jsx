@@ -1,6 +1,6 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
-import { apiPost } from '../../service/api';
+import { apiPost, apiGet, apiPut, apiDelete } from '../../service/api';
 
 export default function RegisterStaff() {
   const navigate = useNavigate();
@@ -10,11 +10,40 @@ export default function RegisterStaff() {
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
   const [role, setRole] = useState('Nurse');
+  const [departmentId, setDepartmentId] = useState('');
+  const [departments, setDepartments] = useState([]);
+  
+  const [newDeptName, setNewDeptName] = useState('');
+  const [deptLoading, setDeptLoading] = useState(false);
+  
+  const [staffList, setStaffList] = useState([]);
+
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
 
+  const [editStaffId, setEditStaffId] = useState(null);
+  const [editRole, setEditRole] = useState('');
+  const [editDepartmentId, setEditDepartmentId] = useState('');
+
   const isActive = (path) => location.pathname === path;
+
+  const fetchData = async () => {
+    try {
+      const deptRes = await apiGet('/departments');
+      setDepartments(deptRes);
+      const staffRes = await apiGet('/staff_roster');
+      setStaffList(staffRes);
+    } catch (err) {
+      console.error('Failed to load data', err);
+    }
+  };
+
+  useEffect(() => {
+    if (staff.role === 'Admin') {
+      fetchData();
+    }
+  }, []);
 
   // Protect route
   if (staff.role !== 'Admin') {
@@ -36,15 +65,33 @@ export default function RegisterStaff() {
         username,
         password,
         role,
+        department_id: departmentId || undefined
       });
       setSuccess(`Successfully registered ${role}: ${username}`);
       setUsername('');
       setPassword('');
       setRole('Nurse');
+      setDepartmentId('');
+      fetchData();
     } catch (err) {
       setError(err.message || 'Failed to register staff');
     } finally {
       setLoading(false);
+    }
+  };
+
+  const handleCreateDepartment = async (e) => {
+    e.preventDefault();
+    setDeptLoading(true);
+    try {
+      await apiPost('/departments', { name: newDeptName });
+      setNewDeptName('');
+      fetchData();
+      setSuccess('Department created successfully!');
+    } catch (err) {
+      setError(err.message || 'Failed to create department');
+    } finally {
+      setDeptLoading(false);
     }
   };
 
@@ -53,6 +100,43 @@ export default function RegisterStaff() {
       localStorage.removeItem('access_token');
       localStorage.removeItem('staff');
       navigate('/staff/login');
+    }
+  };
+
+  const handleEditClick = (member) => {
+    setEditStaffId(member.id);
+    setEditRole(member.role);
+    setEditDepartmentId(member.department_id || '');
+  };
+
+  const handleCancelEdit = () => {
+    setEditStaffId(null);
+    setEditRole('');
+    setEditDepartmentId('');
+  };
+
+  const handleSaveEdit = async (id) => {
+    try {
+      await apiPut(`/staff_roster/${id}`, {
+        role: editRole,
+        department_id: editDepartmentId || null
+      });
+      setEditStaffId(null);
+      fetchData();
+      setSuccess('Staff member updated successfully');
+    } catch (err) {
+      setError(err.message || 'Failed to update staff');
+    }
+  };
+
+  const handleDeleteStaff = async (id) => {
+    if (!confirm('Are you sure you want to delete this staff member?')) return;
+    try {
+      await apiDelete(`/staff_roster/${id}`);
+      fetchData();
+      setSuccess('Staff member deleted successfully');
+    } catch (err) {
+      setError(err.message || 'Failed to delete staff');
     }
   };
 
@@ -153,6 +237,20 @@ export default function RegisterStaff() {
                 </div>
 
                 <div>
+                  <label className="text-[11px] font-semibold uppercase tracking-widest text-muted-foreground">Department</label>
+                  <select
+                    value={departmentId}
+                    onChange={(e) => setDepartmentId(e.target.value)}
+                    className="mt-1 w-full rounded-xl border border-border bg-background p-3 text-sm outline-none focus:border-primary"
+                  >
+                    <option value="">No Department</option>
+                    {departments.map(d => (
+                      <option key={d.id} value={d.id}>{d.name}</option>
+                    ))}
+                  </select>
+                </div>
+
+                <div>
                   <label className="text-[11px] font-semibold uppercase tracking-widest text-muted-foreground">Username</label>
                   <input
                     type="text"
@@ -184,6 +282,95 @@ export default function RegisterStaff() {
                   {loading ? 'Creating account...' : 'Register'}
                 </button>
               </form>
+            </div>
+
+            <div className="max-w-md mx-auto mt-8 rounded-3xl border border-border bg-card p-6 sm:p-8 shadow-sm">
+              <h2 className="font-display text-2xl text-ink">Add Department</h2>
+              <p className="text-sm text-muted-foreground mt-1">Create a new department category</p>
+              <form onSubmit={handleCreateDepartment} className="mt-6 space-y-4">
+                <div>
+                  <label className="text-[11px] font-semibold uppercase tracking-widest text-muted-foreground">Department Name</label>
+                  <input
+                    type="text"
+                    value={newDeptName}
+                    onChange={(e) => setNewDeptName(e.target.value)}
+                    required
+                    className="mt-1 w-full rounded-xl border border-border bg-background p-3 text-sm outline-none focus:border-primary"
+                    placeholder="e.g. Cardiology"
+                  />
+                </div>
+                <button
+                  type="submit"
+                  disabled={deptLoading}
+                  className="mt-2 flex w-full items-center justify-center gap-2 rounded-xl bg-accent py-3 text-sm font-semibold text-accent-foreground transition hover:opacity-90 disabled:opacity-50"
+                >
+                  {deptLoading ? 'Adding...' : 'Add Department'}
+                </button>
+              </form>
+            </div>
+
+            <div className="max-w-md mx-auto mt-8 rounded-3xl border border-border bg-card p-6 sm:p-8 shadow-sm">
+              <h2 className="font-display text-2xl text-ink mb-4">Staff Roster</h2>
+              {staffList.length === 0 ? (
+                <p className="text-sm text-muted-foreground">No staff members found.</p>
+              ) : (
+                <div className="space-y-4">
+                  {staffList.map((member) => (
+                    <div key={member.id} className="flex flex-col border-b border-border pb-3 last:border-0">
+                      {editStaffId === member.id ? (
+                        <div className="flex flex-col gap-2 w-full">
+                          <div className="flex justify-between items-center">
+                            <p className="font-semibold text-sm text-ink">{member.username}</p>
+                            <span className="text-xs text-muted-foreground">Editing...</span>
+                          </div>
+                          <div className="flex gap-2">
+                            <select
+                              value={editRole}
+                              onChange={(e) => setEditRole(e.target.value)}
+                              className="w-1/3 rounded-lg border border-border bg-background p-2 text-xs outline-none"
+                            >
+                              <option value="Nurse">Nurse</option>
+                              <option value="Doctor">Doctor</option>
+                            </select>
+                            <select
+                              value={editDepartmentId}
+                              onChange={(e) => setEditDepartmentId(e.target.value)}
+                              className="w-2/3 rounded-lg border border-border bg-background p-2 text-xs outline-none"
+                            >
+                              <option value="">No Department</option>
+                              {departments.map(d => (
+                                <option key={d.id} value={d.id}>{d.name}</option>
+                              ))}
+                            </select>
+                          </div>
+                          <div className="flex justify-end gap-2 mt-1">
+                            <button onClick={handleCancelEdit} className="text-xs font-semibold text-muted-foreground hover:text-ink">Cancel</button>
+                            <button onClick={() => handleSaveEdit(member.id)} className="text-xs font-semibold text-primary hover:text-primary/80">Save</button>
+                          </div>
+                        </div>
+                      ) : (
+                        <div className="flex items-center justify-between w-full">
+                          <div>
+                            <p className="font-semibold text-sm text-ink">{member.username}</p>
+                            <p className="text-xs text-muted-foreground">
+                              {departments.find(d => d.id === member.department_id)?.name || 'No Department'}
+                            </p>
+                          </div>
+                          <div className="flex flex-col items-end gap-1">
+                            <span className={`rounded-full px-2.5 py-0.5 text-[10px] font-semibold ${member.role === 'Doctor' ? 'bg-primary/10 text-primary' : 'bg-accent/40 text-accent-foreground'}`}>
+                              {member.role}
+                            </span>
+                            <div className="flex gap-2">
+                              <button onClick={() => handleEditClick(member)} className="text-[10px] text-muted-foreground hover:text-primary transition-colors">Edit</button>
+                              <button onClick={() => handleDeleteStaff(member.id)} className="text-[10px] text-muted-foreground hover:text-destructive transition-colors">Delete</button>
+                            </div>
+                          </div>
+                        </div>
+                      )}
+                    </div>
+                  ))}
+                </div>
+              )}
             </div>
           </main>
         </div>

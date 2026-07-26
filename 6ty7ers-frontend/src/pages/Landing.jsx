@@ -33,13 +33,6 @@ export default function Landing() {
         {/* Hero Section */}
         <section className="relative mx-auto max-w-[1440px] px-6 py-20 lg:px-8 lg:py-32">
           <div className="mx-auto flex max-w-4xl flex-col items-center text-center">
-            <div className="mb-8 inline-flex items-center gap-2 rounded-full border border-primary/20 bg-primary/5 px-4 py-1.5 text-xs font-semibold uppercase tracking-widest text-primary shadow-sm shadow-primary/10 backdrop-blur-sm">
-              <span className="relative flex h-2 w-2">
-                <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-primary opacity-75"></span>
-                <span className="relative inline-flex h-2 w-2 rounded-full bg-primary"></span>
-              </span>
-              Next-Gen Flow Management
-            </div>
             
             <h1 className="font-display text-5xl leading-[1.1] tracking-tight text-ink sm:text-7xl lg:text-8xl">
               The future of <br/>

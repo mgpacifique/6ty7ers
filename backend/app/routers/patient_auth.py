@@ -31,7 +31,7 @@ def request_otp(data: schemas.PatientOTPRequest, background_tasks: BackgroundTas
     # Send SMS
     background_tasks.add_task(send_sms, patient.phone_number, f"Your 6ty7ers Clinic login code is: {otp_code}")
     
-    return {"message": "OTP sent successfully"}
+    return {"message": "OTP sent successfully", "dev_otp": otp_code}
 
 @router.post("/verify-otp")
 def verify_otp(data: schemas.PatientOTPVerify, db: Session = Depends(get_db)):

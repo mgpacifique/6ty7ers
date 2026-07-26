@@ -101,11 +101,12 @@ def authenticate_staff(db: Session, username: str, password: str) -> models.Staf
 
 
 def register_staff(db: Session, staff_data: schemas.StaffRegister) -> models.Staff:
-    hashed_password = bcrypt.hashpw(staff_data.password.encode(), bcrypt.gensalt()).decode()
+    hashed_password = bcrypt.hashpw(staff_data.password.encode(), bcrypt.gensalt(4)).decode()
     new_staff = models.Staff(
         username=staff_data.username,
         password_hash=hashed_password,
-        role=staff_data.role
+        role=staff_data.role,
+        department_id=staff_data.department_id
     )
     db.add(new_staff)
     db.commit()
