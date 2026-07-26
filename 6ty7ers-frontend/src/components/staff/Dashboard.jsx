@@ -312,7 +312,7 @@ export default function Dashboard() {
           {/* Main Content */}
           <main className="flex-1 p-4 sm:p-6 lg:p-8">
             {/* KPI Cards */}
-            <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
+            <div className="grid grid-cols-2 gap-3 sm:grid-cols-3">
               <div className="rounded-2xl border border-border bg-card p-4">
                 <div className="flex items-center gap-2 text-[11px] font-semibold uppercase tracking-widest text-muted-foreground">
                   <svg className="h-3.5 w-3.5 text-primary" fill="currentColor" viewBox="0 0 24 24">
@@ -322,17 +322,6 @@ export default function Dashboard() {
                 </div>
                 <div className="font-display mt-2 text-3xl text-ink">{totalWaiting}</div>
                 <div className="text-[11px] text-muted-foreground">Active sessions</div>
-              </div>
-
-              <div className="rounded-2xl border border-border bg-card p-4">
-                <div className="flex items-center gap-2 text-[11px] font-semibold uppercase tracking-widest text-muted-foreground">
-                  <svg className="h-3.5 w-3.5 text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
-                  </svg>
-                  Avg wait
-                </div>
-                <div className="font-display mt-2 text-3xl text-ink">{avgWait}</div>
-                <div className="text-[11px] text-muted-foreground">Since check-in</div>
               </div>
 
               <div className="rounded-2xl border border-border bg-card p-4">
