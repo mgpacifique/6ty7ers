@@ -11,6 +11,7 @@ from datetime import datetime, timedelta, timezone
 
 # passlib 1.7.4 crashes with bcrypt >= 4.1, so we call bcrypt directly
 import bcrypt  # type: ignore[import-not-found]
+import random
 
 from . import models
 from .database import SessionLocal
@@ -47,7 +48,8 @@ def clear_sample_data(db):
     # Departments are deliberately NOT deleted: they are shared reference data
     # that real (non-seed) sessions may point at, so we reuse them instead.
     db.query(models.QueueSession).filter(
-        models.QueueSession.public_token.in_(SAMPLE_TOKENS)
+        models.QueueSession.public_token.in_(SAMPLE_TOKENS) | 
+        models.QueueSession.public_token.like("HST-%")
     ).delete(synchronize_session=False)
 
     sample_phones = [phone for _, phone in SAMPLE_PATIENTS]
@@ -189,6 +191,39 @@ def seed_sessions(db, patients, staff, departments):
             t1_check_in=minutes_ago(2),
         ),
     ]
+
+    # Generate 30 random historical completed sessions to populate time trends
+    dept_keys = list(departments.keys())
+    for i in range(1, 31):
+        offset_hours = random.uniform(1, 24)
+        wait_mins = random.uniform(5, 45)
+        consult_mins = random.uniform(10, 30)
+        
+        t1 = minutes_ago(offset_hours * 60)
+        t2 = t1 + timedelta(minutes=wait_mins)
+        t3 = t2 + timedelta(minutes=consult_mins)
+        
+        patient = random.choice(patients)
+        dept = departments[random.choice(dept_keys)]
+        track = urgent if random.random() < 0.2 else routine
+        score = 100 if track == urgent else 10
+        
+        sessions.append(
+            models.QueueSession(
+                patient_id=patient.id,
+                department_id=dept.id,
+                public_token=f"HST-{300+i}",
+                track_type=track,
+                priority_score=score,
+                status=models.StatusEnum.COMPLETED.value,
+                t1_check_in=t1,
+                t2_called=t2,
+                t3_completed=t3,
+                triaged_by_staff_id=nurse.id,
+                consulted_by_staff_id=doctor.id,
+            )
+        )
+
     db.add_all(sessions)
     return sessions
 
