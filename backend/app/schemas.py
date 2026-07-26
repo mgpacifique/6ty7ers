@@ -20,6 +20,7 @@ class QueueSessionResponse(BaseModel):
 
 class QueueItemResponse(QueueSessionResponse):
     dynamic_priority: int
+    t2_called: Optional[datetime] = None
 
 class StaffOut(BaseModel):
     id: UUID

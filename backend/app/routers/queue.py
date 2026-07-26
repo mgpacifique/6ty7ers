@@ -15,29 +15,27 @@ router = APIRouter(
     tags=["Queue"]
 )
 
-@router.get("/", response_model=List[schemas.QueueItemResponse])
-def get_queue(
+@router.get("/public/", response_model=List[schemas.QueueItemResponse])
+def get_public_queue(
     db: Session = Depends(get_db),
-    current_staff: models.Staff = Depends(
-        require_roles(models.RoleEnum.ADMIN.value, models.RoleEnum.NURSE.value, models.RoleEnum.DOCTOR.value)
-    ),
 ):
-    # Fetch active sessions
+    # Fetch active and called sessions (public endpoint includes Called for TV display)
     active_statuses = [
         models.StatusEnum.REGISTERED.value,
         models.StatusEnum.TRIAGED.value,
-        models.StatusEnum.WAITING.value
+        models.StatusEnum.WAITING.value,
+        models.StatusEnum.CALLED.value
     ]
-    
+
     sessions = db.query(models.QueueSession).filter(
         models.QueueSession.status.in_(active_statuses)
     ).all()
-    
+
     response_items = []
     for session in sessions:
         # Calculate dynamic priority
         dyn_priority = calculate_dynamic_priority(session)
-        
+
         # Create response item
         item = schemas.QueueItemResponse(
             id=session.id,
@@ -46,10 +44,51 @@ def get_queue(
             track_type=session.track_type,
             priority_score=session.priority_score,
             t1_check_in=session.t1_check_in,
+            t2_called=session.t2_called,
             dynamic_priority=dyn_priority
         )
         response_items.append(item)
-        
+
+    # Sort descending by dynamic priority
+    response_items.sort(key=lambda x: x.dynamic_priority, reverse=True)
+    return response_items
+
+@router.get("/", response_model=List[schemas.QueueItemResponse])
+def get_queue(
+    db: Session = Depends(get_db),
+    current_staff: models.Staff = Depends(
+        require_roles(models.RoleEnum.ADMIN.value, models.RoleEnum.NURSE.value, models.RoleEnum.DOCTOR.value)
+    ),
+):
+    # Fetch active sessions (staff only - excludes Called)
+    active_statuses = [
+        models.StatusEnum.REGISTERED.value,
+        models.StatusEnum.TRIAGED.value,
+        models.StatusEnum.WAITING.value
+    ]
+
+    sessions = db.query(models.QueueSession).filter(
+        models.QueueSession.status.in_(active_statuses)
+    ).all()
+
+    response_items = []
+    for session in sessions:
+        # Calculate dynamic priority
+        dyn_priority = calculate_dynamic_priority(session)
+
+        # Create response item
+        item = schemas.QueueItemResponse(
+            id=session.id,
+            public_token=session.public_token,
+            status=session.status,
+            track_type=session.track_type,
+            priority_score=session.priority_score,
+            t1_check_in=session.t1_check_in,
+            t2_called=session.t2_called,
+            dynamic_priority=dyn_priority
+        )
+        response_items.append(item)
+
     # Sort descending by dynamic priority
     response_items.sort(key=lambda x: x.dynamic_priority, reverse=True)
     return response_items

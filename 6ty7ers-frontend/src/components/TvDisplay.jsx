@@ -28,7 +28,7 @@ export default function TvDisplay() {
 
   const updateQueueDisplay = async () => {
     try {
-      const data = await apiGet('/queue/');
+      const data = await apiGet('/queue/public/');
 
       // Work with flat list
       const allPatients = data || [];
@@ -38,16 +38,18 @@ export default function TvDisplay() {
       const routine = allPatients.filter(p => p.track_type === 'Routine');
       const urgent = allPatients.filter(p => p.track_type === 'Urgent');
 
-      // Find currently served patient (Called status)
-      const called = allPatients.filter(p => p.status === 'Called');
+      // Find currently served patient - most recently called
+      const called = allPatients.filter(p => p.status === 'Called')
+        .sort((a, b) => new Date(b.t2_called) - new Date(a.t2_called));
       console.log('Called patients:', called.map(p => p.public_token));
       const nowServingPatient = called[0];
       if (nowServingPatient) {
         setNowServing(nowServingPatient.public_token);
       }
 
-      // Find urgent patient being served
-      const urgentCalled = urgent.filter(p => p.status === 'Called');
+      // Find urgent patient being served - most recently called
+      const urgentCalled = urgent.filter(p => p.status === 'Called')
+        .sort((a, b) => new Date(b.t2_called) - new Date(a.t2_called));
       setShowUrgent(urgentCalled.length > 0);
       if (urgentCalled.length > 0) {
         setUrgentToken(urgentCalled[0].public_token);
