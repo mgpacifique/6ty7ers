@@ -212,6 +212,11 @@ You can run automated test scripts in `backend/`:
   ```
 
 ---
+## Video Tutorial
+
+Demo Video: | [[https://vimeo.com/1214705926?share=copy&fl=sv&fe=ci/](https://vimeo.com/1214705926?share=copy&fl=sv&fe=ci)]
+
+---
 
 ## 📄 License
 This project is for internal and demonstration purposes. All rights reserved.
