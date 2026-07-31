@@ -8,11 +8,12 @@ A full-stack healthcare queue management application designed to streamline pati
 
 | Resource | URL | Description |
 | :--- | :--- | :--- |
-| **Frontend Application** | [http://2.28.15.135/](http://2.28.15.135/) | Main web application |
-| **Staff Portal** | [http://2.28.15.135/staff](http://2.28.15.135/staff) | Staff login & management dashboard |
-| **Patient Portal** | [http://2.28.15.135/patient](http://2.28.15.135/patient) | Patient OTP login & queue tracker |
-| **Interactive API Docs** | [http://2.28.15.135:8000/docs](http://2.28.15.135:8000/docs) | Swagger UI API documentation |
-| **ReDoc API Docs** | [http://2.28.15.135:8000/redoc](http://2.28.15.135:8000/redoc) | Alternative API documentation |
+| **Frontend Application** | [https://booklogger.tech/](https://booklogger.tech/) | Main web application |
+| **Staff Portal** | [https://booklogger.tech/staff](https://booklogger.tech/staff) | Staff login & management dashboard |
+| **Patient Portal** | [https://booklogger.tech/patient](https://booklogger.tech/patient) | Patient OTP login & queue tracker |
+| **Interactive API Docs** | [https://booklogger.tech/docs](https://booklogger.tech/docs) | Swagger UI API documentation |
+| **ReDoc API Docs** | [https://booklogger.tech/redoc](https://booklogger.tech/redoc) | Alternative API documentation |
+| **Waiting Room Tv** | [https://booklogger.tech/tv](https://booklogger.tech/tv) | The waiting room TV to display real-time updates. |
 | **WebSocket Server** | `ws://2.28.15.135:8000/ws` | Programmatic WS endpoint (Use JS, Postman, or `test_ws.py`) |
 
 ---
